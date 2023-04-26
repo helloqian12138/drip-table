@@ -18,6 +18,7 @@ import { TableConfigsContext } from '@/context/table-configs';
 import { generateTableConfigsBySchema, getSchemaValue } from '@/layouts/utils';
 import { DataSourceTypeAbbr, DripTableGeneratorProps } from '@/typing';
 
+import Assistant from './components/assistant';
 import DataSourceEditor from './components/datasource';
 import DropDownButton, { DropDownButtonProps } from './components/dropdown-button';
 import ExportSchema from './components/export-schema';
@@ -122,6 +123,16 @@ ExtraOptions extends Partial<DripTableExtraOptions> = never,
               </div>
             </DropDownButton>
             ) }
+            <DropDownButton
+              {...generateDropdownProps({ name: 'assistant', label: 'AI助手', mode: props.mode, width: 380, height: bodyHeight })}
+              open={operateMenu === 'assistant'}
+              onOpen={onOpen}
+              style={{ marginLeft: 24 }}
+              innerStyle={{ padding: '0 0 8px 0' }}
+              disabled={!!operateMenu && operateMenu !== 'assistant'}
+            >
+              <Assistant />
+            </DropDownButton>
             <DropDownButton
               {...generateDropdownProps({ name: 'datasource', label: '数据源', mode: props.mode, width: props.width, height: bodyHeight })}
               open={operateMenu === 'datasource'}
