@@ -25,14 +25,70 @@
 
 .@{prefixCls}-message {
   height: 32px;
+  box-shadow: 0 -10px 6px -2px rgb(0 0 0 / 5%);
+}
+
+.@{prefixCls}-chat-item {
+  border-bottom: 1px solid transparent;
+  border-top: 1px solid transparent;
+  padding: 12px;
+
+  &.assistant {
+    border-color: rgb(0 0 0 / 10%);
+    background: rgb(247 247 248 / 100%);
+  }
+
+  &-info {
+    display: flex;
+  }
+
+  &-avatar {
+    width: 30px;
+    height: 30px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+
+    &.assistant {
+      background-image: url("https://img13.360buyimg.com/imagetools/jfs/t1/106736/32/25975/159520/644a2f13F69a72307/b7a261b71d697df2.png");
+    }
+
+    &.user {
+      background-image: url("https://img14.360buyimg.com/imagetools/jfs/t1/117648/26/23785/2042/61b6d938E23439b7e/a6adf4060cd368fa.png");
+    }
+  }
+
+  &-username {
+    margin-left: 6px;
+    line-height: 30px;
+    color: rgb(152 152 152);
+  }
+
+  &-message {
+    margin-top: 6px;
+  }
 }
 
 .@{prefixCls}-cursor-blink {
   height: 14px;
-  width: 4px;
+  width: 6px;
   background-color: #000000;
   display: inline-block;
+  vertical-align: middle;
   animation: twinkle .5s infinite alternate;
+  margin-top: -3px;
+  margin-left: 2px;
+}
+
+.@{prefixCls}-code-wrapper {
+  position: relative;
+}
+
+.@{prefixCls}-code-preview {
+  background: #1e1e1e;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 4px;
 }
 
 @keyframes twinkle {

@@ -14,7 +14,7 @@ import React from 'react';
 
 import { DripTableSchema } from '@/packages/drip-table/lib';
 
-import { initSchema, mockData, SampleRecordType, SubtableDataSourceKey } from '../../demo-data';
+import { mockData, SampleRecordType, SubtableDataSourceKey } from '../../demo-data';
 import components from './component-settings';
 import { CustomGlobalConfigPanel } from './custom-global-settings';
 import TextComponent, { TextColumnSchema } from './text-component';
@@ -29,7 +29,7 @@ const Demo = () => (
     mockDataSource
     showTemplate
     mode="page"
-    schema={{ ...initSchema, columns: initSchema.columns.filter(item => !item.component.startsWith('custom::')) } as DripTableSchema}
+    schema={{ paginantion: false, columns: [] } as DripTableSchema}
     dataSource={mockData}
     dataFields={['id', 'name', 'status', 'description', 'ext.state']}
     onExportSchema={(schema) => { message.success('已导出'); console.log(schema); }}

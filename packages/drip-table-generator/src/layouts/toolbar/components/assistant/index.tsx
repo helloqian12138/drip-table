@@ -10,10 +10,14 @@ import './index.less';
 
 import { LoadingOutlined, SendOutlined } from '@ant-design/icons';
 import { Button, Input, message, Space, Spin } from 'antd';
+import classNames from 'classnames';
 import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 
+import { formatJson } from './utils';
+
 export interface AssistantProps {
+  onExportData?: (data: string) => void;
 }
 
 interface Conversation {
@@ -25,7 +29,7 @@ interface Conversation {
 const roleLabel = {
   user: '您',
   system: '系统消息',
-  assistant: 'chatGPT',
+  assistant: 'ChatGPT',
 };
 
 const Assistant = (props: AssistantProps) => {
@@ -38,7 +42,6 @@ const Assistant = (props: AssistantProps) => {
     let conversationData: Conversation[] = [];
     const es = new EventSource('http://127.0.0.1:8001/api/v1/assistant/sse/create');
     es.addEventListener('message', (e) => {
-      console.debug(e.data);
       const newConversations = cloneDeep([...conversationData]);
       if (e.data.startsWith('[DIGITAL_CHAT_ID]:')) {
         setChatId(e.data.replace('[DIGITAL_CHAT_ID]:', ''));
@@ -80,7 +83,6 @@ const Assistant = (props: AssistantProps) => {
     setConversations(conversationData);
     const es = new EventSource(`http://127.0.0.1:8001/api/v1/assistant/sse/chat?connId=${chatId}&message=${content}`);
     es.addEventListener('message', (e) => {
-      console.debug(e.data);
       const newConversations = cloneDeep([...conversationData]);
       if (e.data === '[DONE]') {
         es.close();
@@ -97,11 +99,50 @@ const Assistant = (props: AssistantProps) => {
     });
   };
 
+  const formatMessage = (content: string) => {
+    const match = content.match(/(((示|实)例)|(配置))[：:](\s)?\{/u);
+    if (match) {
+      const index = match.index ?? -1;
+      if (index > 0) {
+        const start = index + match[0].length - 1;
+        const codeEnd = content.lastIndexOf('}');
+        const end = codeEnd <= start || loading ? content.length : codeEnd + 1;
+        return (
+          <React.Fragment>
+            <span>{ content.slice(0, start) }</span>
+            <div className="jfe-drip-table-generator-assistant-code-wrapper">
+              { !loading && (
+                <Button
+                  style={{ position: 'absolute', right: 0 }}
+                  onClick={() => props.onExportData?.(content.slice(start, end))}
+                >
+                  导入表格
+                </Button>
+              ) }
+              <pre className="jfe-drip-table-generator-assistant-code-preview">
+                { formatJson(content.slice(start, end)) }
+              </pre>
+              { !loading && (
+                <Button
+                  style={{ position: 'absolute', right: 0, bottom: 0 }}
+                  onClick={() => props.onExportData?.(content.slice(start, end))}
+                >
+                  导入表格
+                </Button>
+              ) }
+            </div>
+            <span>{ content.slice(end, content.length) }</span>
+          </React.Fragment>
+        );
+      }
+    }
+    return content;
+  };
+
   return (
     <div className="jfe-drip-table-generator-assistant-wrapper">
       <Spin spinning={!chatId} style={{ height: '100%' }}>
-        <div className="jfe-drip-table-generator-assistant-conversation">
-          { chatId && <div>{ chatId }</div> }
+        <div className="jfe-drip-table-generator-assistant-conversation" id={chatId}>
           <div>
             { conversations.map((item, index) => {
               if (item.role === 'system') {
@@ -115,13 +156,21 @@ const Assistant = (props: AssistantProps) => {
                 );
               }
               return (
-                <div style={{ borderBottom: '1px solid #333' }} key={index}>
-                  <div>
-                    { roleLabel[item.role] }
-                    :
+                <div className={classNames('jfe-drip-table-generator-assistant-chat-item', { assistant: item.role === 'assistant' })} key={index}>
+                  <div className="jfe-drip-table-generator-assistant-chat-item-info">
+                    <div className={classNames('jfe-drip-table-generator-assistant-chat-item-avatar', {
+                      assistant: item.role === 'assistant',
+                      user: item.role === 'user',
+                    })}
+                    />
+                    <span className="jfe-drip-table-generator-assistant-chat-item-username">
+                      { roleLabel[item.role] }
+                    </span>
                   </div>
-                  <div>
-                    <div>{ item.message }</div>
+                  <div className="jfe-drip-table-generator-assistant-chat-item-message">
+                    <div style={{ wordWrap: 'break-word', display: 'inline-block', width: item.loading ? void 0 : '100%' }}>
+                      { formatMessage(item.message) }
+                    </div>
                     { item.loading && <span className="jfe-drip-table-generator-assistant-cursor-blink" /> }
                   </div>
                 </div>
@@ -130,11 +179,15 @@ const Assistant = (props: AssistantProps) => {
           </div>
         </div>
         <div className="jfe-drip-table-generator-assistant-message">
-          <Space.Compact style={{ width: '100%' }}>
+          <Space.Compact style={{ width: '100%', alignItems: 'flex-end' }}>
             <Input
-              placeholder="请输入您想问的问题或者给一个指令"
+              placeholder="请输入您想问的问题"
               value={userContent}
               onChange={e => setUserContent(e.target.value)}
+              onPressEnter={() => {
+                chatWithBot(userContent);
+                setUserContent('');
+              }}
             />
             <Button
               loading={loading}

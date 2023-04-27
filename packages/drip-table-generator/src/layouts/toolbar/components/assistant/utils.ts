@@ -22,3 +22,62 @@ export const fetchGptService = (content: string, connId: string) => fetch('http:
   body: JSON.stringify({ message: content, connId }),
 })
   .then(res => res.json());
+
+export function formatJson(json: string): string {
+  let indentLevel = 0;
+  let result = '';
+  let inString = false;
+
+  for (let i = 0; i < json.length; i++) {
+    const char = json[i];
+
+    if (inString) {
+      result += char;
+
+      if (char === '"' && json[i - 1] !== '\\') {
+        inString = false;
+      }
+
+      continue;
+    }
+
+    switch (char) {
+      case '{':
+      case '[': {
+        result += `${char}\n${' '.repeat((indentLevel + 1) * 2)}`;
+        indentLevel += 1;
+        break;
+      }
+
+      case '}':
+      case ']': {
+        indentLevel -= 1;
+        result += `\n${' '.repeat(indentLevel * 2)}${char}`;
+        break;
+      }
+
+      case ',': {
+        result += `,\n${' '.repeat(indentLevel * 2)}`;
+        break;
+      }
+
+      case ':': {
+        result += ': ';
+        break;
+      }
+
+      case '"': {
+        result += char;
+        inString = true;
+        break;
+      }
+
+      default: {
+        result += char;
+        break;
+      }
+    }
+  }
+
+  return result;
+}

@@ -8,11 +8,12 @@
 import './index.less';
 
 import { CheckOutlined, CloseOutlined, ExclamationCircleFilled } from '@ant-design/icons';
-import { Button, Image, Modal } from 'antd';
+import { Button, Image, message, Modal } from 'antd';
 import classNames from 'classnames';
 import { DripTableExtraOptions, DripTableSchema } from 'drip-table';
 import React from 'react';
 
+import { filterAttributes, mockId } from '@/utils';
 import { GeneratorContext } from '@/context';
 import { TableConfigsContext } from '@/context/table-configs';
 import { generateTableConfigsBySchema, getSchemaValue } from '@/layouts/utils';
@@ -58,7 +59,7 @@ const Toolbar = <
 RecordType extends DataSourceTypeAbbr<NonNullable<ExtraOptions['SubtableDataSourceKey']>>,
 ExtraOptions extends Partial<DripTableExtraOptions> = never,
 >(props: DripTableGeneratorProps<RecordType, ExtraOptions>) => {
-  const { drawerType, setState } = React.useContext(GeneratorContext);
+  const { drawerType, currentTableID, setState } = React.useContext(GeneratorContext);
   const [defaultTemplate, setTemplate] = React.useState('');
   const [operateMenu, setOperateMenu] = React.useState(void 0 as string | undefined);
   const onOpen = (isOpen: boolean, key: string) => {
@@ -75,7 +76,7 @@ ExtraOptions extends Partial<DripTableExtraOptions> = never,
 
   return (
     <TableConfigsContext.Consumer>
-      { ({ tableConfigs, updateTableConfigs }) => (
+      { ({ tableConfigs, updateTableConfig, updateTableConfigs }) => (
         <div className="jfe-drip-table-generator-templates-toolbar wrapper">
           <div className="jfe-drip-table-generator-templates-toolbar left">
             { props.showTemplate && (
@@ -123,16 +124,6 @@ ExtraOptions extends Partial<DripTableExtraOptions> = never,
               </div>
             </DropDownButton>
             ) }
-            <DropDownButton
-              {...generateDropdownProps({ name: 'assistant', label: 'AI助手', mode: props.mode, width: 380, height: bodyHeight })}
-              open={operateMenu === 'assistant'}
-              onOpen={onOpen}
-              style={{ marginLeft: 24 }}
-              innerStyle={{ padding: '0 0 8px 0' }}
-              disabled={!!operateMenu && operateMenu !== 'assistant'}
-            >
-              <Assistant />
-            </DropDownButton>
             <DropDownButton
               {...generateDropdownProps({ name: 'datasource', label: '数据源', mode: props.mode, width: props.width, height: bodyHeight })}
               open={operateMenu === 'datasource'}
@@ -185,6 +176,36 @@ ExtraOptions extends Partial<DripTableExtraOptions> = never,
             ) }
           </div>
           <div className="jfe-drip-table-generator-templates-toolbar right">
+            <DropDownButton
+              {...generateDropdownProps({ name: 'assistant', label: 'AI助手', mode: props.mode, width: 380, height: bodyHeight })}
+              open={operateMenu === 'assistant'}
+              onOpen={onOpen}
+              style={{ marginLeft: 24 }}
+              innerStyle={{ padding: '0 0 8px 0', left: 'calc(100% - 380px)' }}
+              disabled={!!operateMenu && operateMenu !== 'assistant'}
+            >
+              <Assistant
+                onExportData={(data) => {
+                  try {
+                    const code = JSON.parse(data);
+                    const globalConfigsToImport = filterAttributes(code, ['columns']);
+                    const columnsToImport = code.columns?.map((item, index) => ({ key: `${item.component}_${mockId()}`, ...item }));
+                    const index = currentTableID ? tableConfigs.findIndex(item => item.tableId === currentTableID) : 0;
+                    if (index > -1) {
+                      updateTableConfig({
+                        ...tableConfigs[index],
+                        configs: { ...globalConfigsToImport },
+                        columns: [...columnsToImport],
+                      }, index);
+                    } else {
+                      message.warning('未选中表格，请先选中您需要操作的表格');
+                    }
+                  } catch {
+                    message.error('解析出错, 请输入正确的JSON数据');
+                  }
+                }}
+              />
+            </DropDownButton>
             { props.mode === 'modal' && <Button onClick={props.onClose} className="jfe-drip-table-generator-templates-close" type="text" icon={<CloseOutlined />} /> }
           </div>
         </div>

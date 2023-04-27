@@ -65,6 +65,8 @@ const ImportSchema = (props: ImportSchemaProps) => {
                       configs: { ...globalConfigsToImport },
                       columns: [...columnsToImport],
                     }, index);
+                  } else {
+                    message.warning('未选中表格，请先选中您需要操作的表格');
                   }
                 } catch {
                   hasError = true;
