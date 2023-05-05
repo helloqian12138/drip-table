@@ -81,3 +81,16 @@ export function formatJson(json: string): string {
 
   return result;
 }
+
+export function jsonToUrlParams(json: Record<string, unknown>) {
+  let params = '';
+  Object.keys(json).forEach((key) => {
+    if (json[key] !== void 0) {
+      if (params.length > 0) {
+        params += '&';
+      }
+      params += `${encodeURIComponent(key)}=${encodeURIComponent(String(json[key]))}`;
+    }
+  });
+  return params;
+}

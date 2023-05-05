@@ -29,7 +29,7 @@ const Demo = () => (
     mockDataSource
     showTemplate
     mode="page"
-    schema={{ paginantion: false, columns: [] } as DripTableSchema}
+    schema={{ pagination: false, columns: [] } as DripTableSchema}
     dataSource={mockData}
     dataFields={['id', 'name', 'status', 'description', 'ext.state']}
     onExportSchema={(schema) => { message.success('已导出'); console.log(schema); }}
