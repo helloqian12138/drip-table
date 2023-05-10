@@ -6,22 +6,13 @@
  * @copyright: Copyright (c) 2020 JD Network Technology Co., Ltd.
  */
 
-export const createGptService = () => fetch('http://127.0.0.1:8001/api/v1/assistant/createChat', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-  .then(res => res.json());
-
-export const fetchGptService = (content: string, connId: string) => fetch('http://127.0.0.1:8001/api/v1/assistant/sse/chat', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({ message: content, connId }),
-})
-  .then(res => res.json());
+export const AssistantParams = {
+  ...process.env,
+  temperature: 0,
+  systemMessage: `根据下面的上下文回答问题。保持答案简短明了。如果不确定答案，请回答"不确定答案"。
+  水滴表格，又称 drip table，用于中后台 CMS 列表页的快速搭建，通过简单 JSON Schema 数据即可生成表格。
+  水滴表格配置数据是一个JSON数据，它包括id、columns、bordered、pagination、size、rowSelection、editable、stripe等字段。id为表格标识符；bordered类型为boolean，表示展示表格边框；size表示表格大小，枚举值，可取small 或 middle 或 large，默认为middle; rowSelection 表示是否支持选择栏；editable表示表格是否支持在线编辑；stripre表示表格是否展示斑马纹；pagination字段是表格的分页配置，包括 pageSize、 size、position字段，pageSize表示每页数据行数；size表示分页器大小，可取'small'和'default'；positions字段可取 topLeft 或 topCenter 或 topRight 或 bottomLeft或 bottomCenter 或bottomRight，默认为bottomRight。columns是表格的列配置，每一列包括 key、title、component、options和dataIndex字段。每一列的key字段是该列的唯一标识符，title字段表示该列的标题文案或者列头文案，component表示该列的单元格采用哪个组件渲染，其值为组件名，目前可以使用的组件名包括：'text'、'image'、'button'、'link'。text 是纯文本展示组件，image 是 图片组件、button是按钮组件。options对应组件类型的配置属性，默认为{}；dataIndex 是数据的字段值，用于获取数据。`,
+};
 
 export function formatJson(json: string): string {
   let indentLevel = 0;

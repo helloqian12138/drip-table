@@ -54,6 +54,7 @@
     "classnames": "^2.3.2",
     "concurrently": "^7.6.0",
     "cz-conventional-changelog": "^3.3.0",
+    "dotenv": "^16.0.3",
     "drip-table": "link:packages/drip-table",
     "drip-table-generator": "link:packages/drip-table-generator",
     "dumi": "^2.0.17",

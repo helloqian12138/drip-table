@@ -14,7 +14,7 @@ import classNames from 'classnames';
 import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 
-import { formatJson } from './utils';
+import { AssistantParams, jsonToUrlParams } from './utils';
 
 export interface AssistantProps {
   onExportData?: (data: string) => void;
@@ -40,27 +40,45 @@ const Assistant = (props: AssistantProps) => {
 
   function startChat() {
     let conversationData: Conversation[] = [];
-    const es = new EventSource('http://127.0.0.1:8001/api/v1/assistant/sse/create');
-    es.addEventListener('message', (e) => {
+    let messageCount = 0;
+    const urlParams = {
+      ...AssistantParams,
+      message: '您好',
+    };
+    const evtSrc = new EventSource(`http://chatgpt-relay.jd.com/chatgptrelay/chat?${jsonToUrlParams(urlParams)}`, {
+      withCredentials: true,
+    });
+    evtSrc.addEventListener('message', (event) => {
+      messageCount += 1;
       const newConversations = cloneDeep([...conversationData]);
-      if (e.data.startsWith('[DIGITAL_CHAT_ID]:')) {
-        setChatId(e.data.replace('[DIGITAL_CHAT_ID]:', ''));
-        const initConversations: Conversation[] = [
-          { role: 'user', message: '您好', loading: false },
-          { role: 'assistant', message: '', loading: true },
-        ];
-        setConversations(initConversations);
-        conversationData = initConversations;
-      } else if (e.data === '[DONE]') {
-        es.close();
-        newConversations[newConversations.length - 1] = { ...newConversations[newConversations.length - 1], loading: false };
-        setConversations(newConversations);
-        conversationData = newConversations;
-      } else {
-        const botMessage = `${newConversations[newConversations.length - 1].message}${e.data}`;
-        newConversations[newConversations.length - 1] = { role: 'assistant', message: botMessage, loading: true };
-        setConversations(newConversations);
-        conversationData = newConversations;
+      try {
+        const result = JSON.parse(event.data ?? '')?.data;
+        if (result === '[DONE]') {
+          evtSrc.close();
+          newConversations[newConversations.length - 1] = { ...newConversations[newConversations.length - 1], loading: false };
+          setConversations(newConversations);
+          conversationData = newConversations;
+          return;
+        }
+        const messageContent = result.choices[0].delta.content ?? '';
+        if (messageCount > 1) {
+          const botMessage = `${newConversations[newConversations.length - 1].message}${messageContent}`;
+          newConversations[newConversations.length - 1] = { role: 'assistant', message: botMessage, loading: true };
+          setConversations(newConversations);
+          conversationData = newConversations;
+        } else {
+          setChatId(result.conversationId);
+          const initConversations: Conversation[] = [
+            { role: 'user', message: '您好', loading: false },
+            { role: 'assistant', message: messageContent, loading: true },
+          ];
+          setConversations(initConversations);
+          conversationData = initConversations;
+        }
+      } catch (error) {
+        console.error(error);
+        message.error((error as Error).message);
+        evtSrc.close();
       }
     });
   }
@@ -71,7 +89,7 @@ const Assistant = (props: AssistantProps) => {
 
   const chatWithBot = (content: string) => {
     if (!chatId) {
-      message.error('服务链接失败，请重启标签');
+      message.error('服务链接失败，请重启助手');
       return;
     }
     setLoading(true);
@@ -81,35 +99,50 @@ const Assistant = (props: AssistantProps) => {
       { role: 'assistant', message: '', loading: true },
     );
     setConversations(conversationData);
-    const es = new EventSource(`http://127.0.0.1:8001/api/v1/assistant/sse/chat?connId=${chatId}&message=${content}`);
-    es.addEventListener('message', (e) => {
+    const urlParams = {
+      ...AssistantParams,
+      message: content,
+      conversationId: chatId,
+    };
+    const evtSrc = new EventSource(`http://chatgpt-relay.jd.com/chatgptrelay/chat?${jsonToUrlParams(urlParams)}`, {
+      withCredentials: true,
+    });
+    evtSrc.addEventListener('message', (event) => {
       const newConversations = cloneDeep([...conversationData]);
-      if (e.data === '[DONE]') {
-        es.close();
-        setLoading(false);
-        newConversations[newConversations.length - 1] = { ...newConversations[newConversations.length - 1], loading: false };
-        setConversations(newConversations);
-        conversationData = newConversations;
-      } else {
-        const botMessage = `${newConversations[newConversations.length - 1].message}${e.data}`;
-        newConversations[newConversations.length - 1] = { role: 'assistant', message: botMessage, loading: true };
-        setConversations(newConversations);
-        conversationData = newConversations;
+      try {
+        const result = JSON.parse(event.data ?? '')?.data;
+        if (result === '[DONE]') {
+          evtSrc.close();
+          setLoading(false);
+          newConversations[newConversations.length - 1] = { ...newConversations[newConversations.length - 1], loading: false };
+          setConversations(newConversations);
+          conversationData = newConversations;
+        } else {
+          const messageContent = result.choices[0].delta.content ?? '';
+          const botMessage = `${newConversations[newConversations.length - 1].message}${messageContent}`;
+          newConversations[newConversations.length - 1] = { role: 'assistant', message: botMessage, loading: true };
+          setConversations(newConversations);
+          conversationData = newConversations;
+        }
+      } catch (error) {
+        console.error(error);
+        message.error((error as Error).message);
+        evtSrc.close();
       }
     });
   };
 
   const formatMessage = (content: string) => {
-    const match = content.match(/(((示|实)例)|(配置))[：:](\s)?\{/u);
+    const match = content.match(/```json\n/u);
     if (match) {
       const index = match.index ?? -1;
       if (index > 0) {
-        const start = index + match[0].length - 1;
+        const start = index + match[0].length;
         const codeEnd = content.lastIndexOf('}');
         const end = codeEnd <= start || loading ? content.length : codeEnd + 1;
         return (
           <React.Fragment>
-            <span>{ content.slice(0, start) }</span>
+            <span>{ content.slice(0, start).replace('```json\n', '') }</span>
             <div className="jfe-drip-table-generator-assistant-code-wrapper">
               { !loading && (
                 <Button
@@ -120,7 +153,7 @@ const Assistant = (props: AssistantProps) => {
                 </Button>
               ) }
               <pre className="jfe-drip-table-generator-assistant-code-preview">
-                { formatJson(content.slice(start, end)) }
+                { content.slice(start, end) }
               </pre>
               { !loading && (
                 <Button
@@ -131,7 +164,7 @@ const Assistant = (props: AssistantProps) => {
                 </Button>
               ) }
             </div>
-            <span>{ content.slice(end, content.length) }</span>
+            <span>{ content.slice(end, content.length).replace('```', '') }</span>
           </React.Fragment>
         );
       }

@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import { defineConfig } from 'dumi';
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 import path from 'path';
@@ -395,8 +396,19 @@ export default defineConfig({
     'drip-table-generator': path.resolve(__dirname, './packages/drip-table-generator'),
   },
   chainWebpack(config, { webpack }) {
+    const configs = dotenv.config({
+      path: path.resolve(__dirname, './.env'),
+      encoding: 'utf8',
+    }).parsed;
+    const env: Record<string, string> = {};
+    for (const key of Object.keys(configs || {})) {
+      env[key] = configs?.[key] ?? '';
+    }
     config.devServer.contentBase(path.join(__dirname, 'docs-static'));
     config.devServer.watchContentBase(true);
+    config.plugin('define').use(webpack.DefinePlugin, [{
+      'process.env': JSON.stringify(env),
+    }]);
     config.plugin('monaco-editor').use(MonacoWebpackPlugin);
   },
   copy: [
