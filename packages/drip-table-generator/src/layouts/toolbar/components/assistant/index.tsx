@@ -14,7 +14,7 @@ import classNames from 'classnames';
 import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 
-import { AssistantParams, jsonToUrlParams } from './utils';
+import { jsonToUrlParams, OPEN_AI_API_HOST } from './utils';
 
 export interface AssistantProps {
   onExportData?: (data: string) => void;
@@ -42,32 +42,32 @@ const Assistant = (props: AssistantProps) => {
     let conversationData: Conversation[] = [];
     let messageCount = 0;
     const urlParams = {
-      ...AssistantParams,
       message: '您好',
+      stream: true,
     };
-    const evtSrc = new EventSource(`http://chatgpt-relay.jd.com/chatgptrelay/chat?${jsonToUrlParams(urlParams)}`, {
+    const evtSrc = new EventSource(`${OPEN_AI_API_HOST}/chat?${jsonToUrlParams(urlParams)}`, {
       withCredentials: true,
     });
     evtSrc.addEventListener('message', (event) => {
       messageCount += 1;
       const newConversations = cloneDeep([...conversationData]);
       try {
-        const result = JSON.parse(event.data ?? '')?.data;
-        if (result === '[DONE]') {
+        const result = JSON.parse(event.data ?? '');
+        if (result.done || !result) {
           evtSrc.close();
           newConversations[newConversations.length - 1] = { ...newConversations[newConversations.length - 1], loading: false };
           setConversations(newConversations);
           conversationData = newConversations;
           return;
         }
-        const messageContent = result.choices[0].delta.content ?? '';
+        const messageContent = result.message ?? '';
         if (messageCount > 1) {
           const botMessage = `${newConversations[newConversations.length - 1].message}${messageContent}`;
           newConversations[newConversations.length - 1] = { role: 'assistant', message: botMessage, loading: true };
           setConversations(newConversations);
           conversationData = newConversations;
         } else {
-          setChatId(result.conversationId);
+          setChatId(result.id);
           const initConversations: Conversation[] = [
             { role: 'user', message: '您好', loading: false },
             { role: 'assistant', message: messageContent, loading: true },
@@ -100,25 +100,25 @@ const Assistant = (props: AssistantProps) => {
     );
     setConversations(conversationData);
     const urlParams = {
-      ...AssistantParams,
+      history: JSON.stringify(conversations.map(item => ({ role: item.role, content: item.message }))),
       message: content,
-      conversationId: chatId,
+      stream: true,
     };
-    const evtSrc = new EventSource(`http://chatgpt-relay.jd.com/chatgptrelay/chat?${jsonToUrlParams(urlParams)}`, {
+    const evtSrc = new EventSource(`${OPEN_AI_API_HOST}/chat?${jsonToUrlParams(urlParams)}`, {
       withCredentials: true,
     });
     evtSrc.addEventListener('message', (event) => {
       const newConversations = cloneDeep([...conversationData]);
       try {
-        const result = JSON.parse(event.data ?? '')?.data;
-        if (result === '[DONE]') {
+        const result = JSON.parse(event.data ?? '');
+        if (result.done) {
           evtSrc.close();
           setLoading(false);
           newConversations[newConversations.length - 1] = { ...newConversations[newConversations.length - 1], loading: false };
           setConversations(newConversations);
           conversationData = newConversations;
         } else {
-          const messageContent = result.choices[0].delta.content ?? '';
+          const messageContent = result.message ?? '';
           const botMessage = `${newConversations[newConversations.length - 1].message}${messageContent}`;
           newConversations[newConversations.length - 1] = { role: 'assistant', message: botMessage, loading: true };
           setConversations(newConversations);

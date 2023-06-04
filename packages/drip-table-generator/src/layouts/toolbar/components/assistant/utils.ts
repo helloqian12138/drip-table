@@ -6,6 +6,8 @@
  * @copyright: Copyright (c) 2020 JD Network Technology Co., Ltd.
  */
 
+export const OPEN_AI_API_HOST = 'http://127.0.0.1:8090/api/v1/openai';
+
 export const AssistantParams = {
   ...process.env,
   temperature: 0,

@@ -177,7 +177,7 @@ ExtraOptions extends Partial<DripTableExtraOptions> = never,
           </div>
           <div className="jfe-drip-table-generator-templates-toolbar right">
             <DropDownButton
-              {...generateDropdownProps({ name: 'assistant', label: 'AI助手', mode: props.mode, width: 380, height: bodyHeight })}
+              {...generateDropdownProps({ name: 'assistant', label: 'Drip Copilot', mode: props.mode, width: 380, height: bodyHeight })}
               open={operateMenu === 'assistant'}
               onOpen={onOpen}
               style={{ marginLeft: 24 }}

@@ -8,7 +8,7 @@
 
 import './index.less';
 
-import { PicLeftOutlined, SettingOutlined } from '@ant-design/icons';
+import { PicLeftOutlined, RobotOutlined, SettingOutlined } from '@ant-design/icons';
 import { AutoComplete, Button, Dropdown, Tooltip } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
@@ -16,6 +16,8 @@ import React from 'react';
 import { mockId } from '@/utils';
 import { DripTableGeneratorContext, GeneratorContext } from '@/context';
 import { DTGTableConfig, TableConfigsContext } from '@/context/table-configs';
+
+import TableAssistant from './components/assistant';
 
 export interface TableContainerProps {
   tableConfig: DTGTableConfig;
@@ -146,6 +148,23 @@ const TableContainer = (props: TableContainerProps) => (
                   onClick={e => e.stopPropagation()}
                 >
                   子表格
+                </Button>
+              </Tooltip>
+            </Dropdown>
+            <Dropdown
+              placement="bottomRight"
+              trigger={['click']}
+              dropdownRender={() => <TableAssistant tableConfig={props.tableConfig} />}
+            >
+              <Tooltip title="描述业务场景让AI助手一键生成表格">
+                <Button
+                  size="small"
+                  ghost
+                  className="jfe-drip-table-generator-table-container-inner-button"
+                  icon={<RobotOutlined />}
+                  onClick={e => e.stopPropagation()}
+                >
+                  AI一键生成
                 </Button>
               </Tooltip>
             </Dropdown>
