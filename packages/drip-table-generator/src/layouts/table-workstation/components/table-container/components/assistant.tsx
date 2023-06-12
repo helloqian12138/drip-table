@@ -60,8 +60,8 @@ const TableAssistant = (props: TableAssistantProps) => {
     let taskMessage = question;
     if (history.length <= 0) {
       taskMessage = `您好，${question}`;
-    } else if (question.includes('添加') && question.includes('操作栏')) {
-      taskMessage = `${question}, 采用link组件，options字段格式如下：{ "mode": "multiple", "operates": [{ "label": "编辑", "value": "edit", "href": "/product/edit/{id}"},{ "label": "删除", "value": "delete", "href": "/product/delete/{id}"}]}。`;
+    } else if (question.includes('添加') && (question.includes('操作栏') || question.includes('操作列'))) {
+      taskMessage = `${question}，component字段为link，options字段格式如下：{ "mode": "multiple", "operates": [{ "label": "编辑", "value": "edit", "href": "/product/edit/{id}"},{ "label": "删除", "value": "delete", "href": "/product/delete/{id}"}]}。`;
     }
     const urlParams = {
       history: history.length <= 0 ? void 0 : JSON.stringify(history),
