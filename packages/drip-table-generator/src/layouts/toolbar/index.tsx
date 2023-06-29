@@ -24,6 +24,7 @@ import DataSourceEditor from './components/datasource';
 import DropDownButton, { DropDownButtonProps } from './components/dropdown-button';
 import ExportSchema from './components/export-schema';
 import ImportSchema from './components/import-schema';
+import OcrTable from './components/ocr-table';
 import { DTGBuiltInTemplates } from './templates';
 
 function generateDropdownProps(props: {
@@ -205,6 +206,16 @@ ExtraOptions extends Partial<DripTableExtraOptions> = never,
                   }
                 }}
               />
+            </DropDownButton>
+            <DropDownButton
+              {...generateDropdownProps({ name: 'ocr', label: '图生表', mode: props.mode, width: 380, height: bodyHeight })}
+              open={operateMenu === 'ocr'}
+              onOpen={onOpen}
+              style={{ marginLeft: 24 }}
+              innerStyle={{ padding: '0 0 8px 0', left: 'calc(100% - 380px)' }}
+              disabled={!!operateMenu && operateMenu !== 'ocr'}
+            >
+              <OcrTable />
             </DropDownButton>
             { props.mode === 'modal' && <Button onClick={props.onClose} className="jfe-drip-table-generator-templates-close" type="text" icon={<CloseOutlined />} /> }
           </div>
