@@ -96,6 +96,38 @@ const OcrTable = () => {
       console.debug('Dropped files', e.dataTransfer.files);
     },
   };
+
+  /*
+   * React.useEffect(() => {
+   *   const data = new FormData();
+   *   data.append('bizId', 'drip');
+   *   data.append('bizToken', 'c4b71c84-fb80-4dcb-94ca-4f25d37d0ae5');
+   *   data.append('input', 'chatgptRelay is already connected');
+   *   data.append('model', 'text-embedding-ada-002');
+   *   data.append('userId', 'qianjing29');
+   *   fetch('http://jx-chatgpt-relay-beta.jx-promote.svc.hk03.n.jd.local/chatgptrelay/embeddings', {
+   *     method: 'POST',
+   *     body: data,
+   *   })
+   *     .then(res => res.json())
+   *     .then(res => console.debug(res))
+   *     .catch((error: unknown) => console.error(error));
+   * }, []);
+   */
+
+  React.useEffect(() => {
+    fetch('http://jx-chatgpt-relay-prod02.jx-promote.svc.hk2.n.jd.local/vs/search_doc', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'chunk_conent=false&chunk_size=1000&knowledge_base_id=hibox&question=什么是hibox&score_threshold=0.5&top_k=3',
+    })
+      .then(res => res.json())
+      .then(res => console.debug(res))
+      .catch((error: unknown) => console.error(error));
+  }, []);
+
   return (
     <TableConfigsContext.Consumer>
       { ({ tableConfigs, updateTableConfig, updateTableConfigs }) => (
