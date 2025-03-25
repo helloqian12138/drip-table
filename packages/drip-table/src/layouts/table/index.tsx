@@ -1600,9 +1600,7 @@ function TableLayout<
         if (pagination.position === 'bottomCenter' || pagination.position === 'topCenter') {
           return 'center';
         }
-        if (pagination.position === 'bottomRight' || pagination.position === 'topRight') {
-          return 'right';
-        }
+        return 'right';
       }
       return void 0;
     },
