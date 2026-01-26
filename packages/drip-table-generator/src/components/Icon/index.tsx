@@ -6,8 +6,6 @@
  * @copyright: Copyright (c) 2020 JD Network Technology Co., Ltd.
  */
 
-import cheerio, * as Cheerio from 'cheerio';
-import * as DOMHandler from 'domhandler';
 import { DripTableProps, DripTableRecordTypeBase } from 'drip-table';
 import React from 'react';
 
@@ -84,6 +82,9 @@ const HIDDEN_TAG_PROP_NAME = new Set([
   'class',
 ]);
 
+const NODE_TYPE_ELEMENT = 1;
+const NODE_TYPE_TEXT = 3;
+
 interface ReducerRenderValue {
   elements: (JSX.Element | string)[];
   tagNames: SvgTagName[];
@@ -100,24 +101,45 @@ export default class Icon extends React.PureComponent<IconProps> {
    *
    * @private
    * @param {ReducerRenderValue} prevVal 迭代器当前数据
-   * @param {CheerioElement} el 节点原始数据
+   * @param {Node} el 节点原始数据
    * @param {number} key 节点唯一标识
    * @param {number} maxLength 最大剩余渲染文本长度
    * @returns {ReducerRenderValue} 迭代器当前数据
    *
    * @memberOf RichText
    */
-  private reducerRenderEl = (prevVal: ReducerRenderValue, el: DOMHandler.Element | Cheerio.Node, key: number): ReducerRenderValue => {
+  private reducerRenderEl = (prevVal: ReducerRenderValue, el: Node, key: number): ReducerRenderValue => {
     const { tagNames } = prevVal;
-    if ('tagName' in el && tagNames.includes(el.tagName as never)) {
-      const tagName = el.tagName;
-      const { attribs = {}, children } = el;
+    if (el.nodeType === NODE_TYPE_TEXT) {
+      const text = el.textContent ?? '';
+      if (text) {
+        prevVal.elements.push(text);
+      }
+      return prevVal;
+    }
+    if (el.nodeType === NODE_TYPE_ELEMENT) {
+      const element = el as Element;
+      const tagName = element.tagName as SvgTagName;
+      if (!tagNames.includes(tagName)) {
+        return prevVal;
+      }
+      const attribs: Record<string, string> = {};
+      if (element.hasAttributes()) {
+        const attributes = element.attributes;
+        for (let i = 0; i < attributes.length; i += 1) {
+          const attr = attributes.item(i);
+          if (attr) {
+            attribs[attr.name] = attr.value;
+          }
+        }
+      }
       const style: React.CSSProperties = {};
       if (attribs.style) {
         attribs.style.split(';').forEach((s: string) => {
           const [k, v] = s.split(':');
           if (v) {
-            style[k.trim().replace(/-([a-z])/ug, (_: string, c: string) => c.toUpperCase())] = v.trim();
+            const styleKey = k.trim().replace(/-([a-z])/ug, (_: string, c: string) => c.toUpperCase());
+            (style as unknown as Record<string, string>)[styleKey] = v.trim();
           }
         });
       }
@@ -139,11 +161,17 @@ export default class Icon extends React.PureComponent<IconProps> {
         props.title = attribs.title;
       }
       let content: (JSX.Element | string | null)[] | undefined;
-      if (children) {
-        const res = children.reduce<ReducerRenderValue>(this.reducerRenderEl, {
+      if (element.childNodes && element.childNodes.length > 0) {
+        let res: ReducerRenderValue = {
           elements: [],
           tagNames,
-        });
+        };
+        for (let i = 0; i < element.childNodes.length; i += 1) {
+          const child = element.childNodes.item(i);
+          if (child) {
+            res = this.reducerRenderEl(res, child, i);
+          }
+        }
         if (res.elements.length > 0) {
           content = res.elements;
         }
@@ -171,15 +199,31 @@ export default class Icon extends React.PureComponent<IconProps> {
           <div className={this.props.className} style={{ ...this.props.style, backgroundImage: `url(${this.props.svg})` }} />
         );
       }
-      const rootElement = cheerio.load(this.props.svg)('body')[0];
+      let rootElement: Element | null = null;
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(this.props.svg, 'image/svg+xml');
+        rootElement = doc.documentElement;
+      } catch (error) {
+        console.error(error);
+      }
       return (
         <div className={this.props.className} style={this.props.style}>
           {
-          rootElement && rootElement.type === 'tag'
-            ? rootElement.children.reduce<ReducerRenderValue>(this.reducerRenderEl, {
-              elements: [],
-              tagNames: SAFE_SVG_NAME,
-            }).elements
+          rootElement
+            ? (() => {
+              let res: ReducerRenderValue = {
+                elements: [],
+                tagNames: SAFE_SVG_NAME,
+              };
+              for (let i = 0; i < rootElement.childNodes.length; i += 1) {
+                const child = rootElement.childNodes.item(i);
+                if (child) {
+                  res = this.reducerRenderEl(res, child, i);
+                }
+              }
+              return res.elements;
+            })()
             : void 0
         }
         </div>

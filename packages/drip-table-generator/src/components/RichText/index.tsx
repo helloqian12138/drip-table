@@ -8,8 +8,6 @@
 
 import 'viewerjs/dist/viewer.css';
 
-import cheerio, * as Cheerio from 'cheerio';
-import * as DOMHandler from 'domhandler';
 import React from 'react';
 import ViewerJS from 'viewerjs';
 
@@ -310,6 +308,9 @@ const HIDDEN_TAG_PROP_NAME = new Set([
   'class',
 ]);
 
+const NODE_TYPE_ELEMENT = 1;
+const NODE_TYPE_TEXT = 3;
+
 interface ReducerRenderValue {
   elements: (JSX.Element | string)[];
   maxLength: number;
@@ -330,17 +331,17 @@ export default class RichText extends React.PureComponent<RichTextProps> {
    *
    * @private
    * @param {ReducerRenderValue} prevVal 迭代器当前数据
-   * @param {CheerioElement} el 节点原始数据
+   * @param {Node} el 节点原始数据
    * @param {number} key 节点唯一标识
    * @param {number} maxLength 最大剩余渲染文本长度
    * @returns {ReducerRenderValue} 迭代器当前数据
    *
    * @memberOf RichText
    */
-  private reducerRenderEl = (prevVal: ReducerRenderValue, el: DOMHandler.DataNode | DOMHandler.Element | Cheerio.Node, key: number): ReducerRenderValue => {
+  private reducerRenderEl = (prevVal: ReducerRenderValue, el: Node, key: number): ReducerRenderValue => {
     const { maxLength, singleLine, highlight, tagNames, domEvents } = prevVal;
-    if (el.type === 'text') {
-      let text = 'data' in el ? el.data ?? '' : '';
+    if (el.nodeType === NODE_TYPE_TEXT) {
+      let text = el.textContent ?? '';
       if (singleLine) {
         text = text.replace(/[\r\n]/ug, '$nbsp');
       }
@@ -358,15 +359,29 @@ export default class RichText extends React.PureComponent<RichTextProps> {
       );
       return prevVal;
     }
-    if ('tagName' in el && tagNames.includes(el.tagName as never)) {
-      const tagName = el.tagName;
-      const { attribs = {}, children } = el;
+    if (el.nodeType === NODE_TYPE_ELEMENT) {
+      const element = el as Element;
+      const tagName = element.tagName.toLowerCase() as HTMLTagName;
+      if (!tagNames.includes(tagName)) {
+        return prevVal;
+      }
+      const attribs: Record<string, string> = {};
+      if (element.hasAttributes()) {
+        const attributes = element.attributes;
+        for (let i = 0; i < attributes.length; i += 1) {
+          const attr = attributes.item(i);
+          if (attr) {
+            attribs[attr.name] = attr.value;
+          }
+        }
+      }
       const style: React.CSSProperties = {};
       if (attribs.style) {
         attribs.style.split(';').forEach((s: string) => {
           const [k, v] = s.split(':');
           if (v) {
-            style[k.trim().replace(/-([a-z])/ug, (_: string, c: string) => c.toUpperCase())] = v.trim();
+            const styleKey = k.trim().replace(/-([a-z])/ug, (_: string, c: string) => c.toUpperCase());
+            (style as unknown as Record<string, string>)[styleKey] = v.trim();
           }
         });
       }
@@ -409,15 +424,21 @@ export default class RichText extends React.PureComponent<RichTextProps> {
         props.title = attribs.title;
       }
       let content: (JSX.Element | string | null)[] | undefined;
-      if (children) {
-        const res = children.reduce<ReducerRenderValue>(this.reducerRenderEl, {
+      if (element.childNodes && element.childNodes.length > 0) {
+        let res: ReducerRenderValue = {
           elements: [],
           maxLength,
           singleLine,
           highlight,
           tagNames,
           domEvents,
-        });
+        };
+        for (let i = 0; i < element.childNodes.length; i += 1) {
+          const child = element.childNodes.item(i);
+          if (child) {
+            res = this.reducerRenderEl(res, child, i);
+          }
+        }
         if (res.elements.length > 0) {
           content = res.elements;
         }
@@ -455,19 +476,35 @@ export default class RichText extends React.PureComponent<RichTextProps> {
   }
 
   public render(): JSX.Element | null {
-    const bodyEl = cheerio.load(this.props.html)('body')[0];
+    let bodyEl: HTMLElement | null = null;
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(this.props.html, 'text/html');
+      bodyEl = doc.body;
+    } catch (error) {
+      console.error(error);
+    }
     return (
       <div ref={this.onRef} style={this.props.style} className={this.props.className}>
         {
-          bodyEl && bodyEl.type === 'tag'
-            ? bodyEl.children.reduce<ReducerRenderValue>(this.reducerRenderEl, {
-              elements: [],
-              maxLength: this.props.maxLength ?? -1,
-              singleLine: this.props.singleLine ?? false,
-              highlight: this.props.highlight,
-              tagNames: this.props.tagNames ?? SAFE_TAG_NAME,
-              domEvents: Object.fromEntries((this.props.domEvents ?? DOM_EVENT_TYPE).map(name => [name.toLowerCase(), name])),
-            }).elements
+          bodyEl
+            ? (() => {
+              let res: ReducerRenderValue = {
+                elements: [],
+                maxLength: this.props.maxLength ?? -1,
+                singleLine: this.props.singleLine ?? false,
+                highlight: this.props.highlight,
+                tagNames: this.props.tagNames ?? SAFE_TAG_NAME,
+                domEvents: Object.fromEntries((this.props.domEvents ?? DOM_EVENT_TYPE).map(name => [name.toLowerCase(), name])),
+              };
+              for (let i = 0; i < bodyEl.childNodes.length; i += 1) {
+                const child = bodyEl.childNodes.item(i);
+                if (child) {
+                  res = this.reducerRenderEl(res, child, i);
+                }
+              }
+              return res.elements;
+            })()
             : void 0
         }
       </div>
