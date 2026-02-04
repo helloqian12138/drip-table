@@ -1731,7 +1731,57 @@ function TableLayout<
       <ResizeObserver onResize={rcTableOnResize}>
         <div className={`${prefixCls}-resize-observer`}>
           { tableProps.renderer
-            ? tableProps.renderer()
+            ? (
+              <tableProps.renderer
+                prefixCls={prefixCls}
+                className={classNames(`${prefixCls}`, tableProps.schema.innerClassName, {
+                  [`${prefixCls}-small`]: tableProps.schema.size === 'small',
+                  [`${prefixCls}-middle`]: tableProps.schema.size === 'middle',
+                  [`${prefixCls}--bordered`]: tableProps.schema.bordered,
+                  [`${prefixCls}--border-radius`]: tableProps.schema.borderRadius,
+                  [`${prefixCls}--stripe`]: tableProps.schema.stripe,
+                })}
+                rowKey="key"
+                columns={rcTableColumns}
+                data={rcTableDataSource}
+                scroll={rcTableScroll}
+                tableLayout={tableProps.schema.tableLayout}
+                rowClassName={rcTableRowClassName}
+                components={rcTableComponents}
+                showHeader={tableProps.schema.showHeader}
+                sticky={
+                  tableProps.schema.sticky
+                    ? tableProps.sticky ?? true
+                    : false
+                }
+                title={
+                  React.useMemo(
+                    () => (
+                      tableProps.title
+                        ? (rows: RcTableRecordType<RecordType>[]) => tableProps.title?.(rows.map(r => r.record))
+                        : void 0
+                    ),
+                    [tableProps.title],
+                  )
+                }
+                footer={
+                  React.useMemo(
+                    () => (
+                      tableProps.footer
+                        ? (rows: RcTableRecordType<RecordType>[]) => tableProps.footer?.(rows.map(r => r.record))
+                        : void 0
+                    ),
+                    [tableProps.footer],
+                  )
+                }
+                expandable={rcTableExpandable}
+                emptyText={RcEmptyText}
+                onRow={(row: RcTableRecordType<RecordType>, index: number) => ({
+                  onClick: () => tableProps.onRowClick?.(row.record, row.index ?? index, tableInfo),
+                  onDoubleClick: () => tableProps.onRowDoubleClick?.(row.record, row.index ?? index, tableInfo),
+                })}
+              />
+            )
             : (
               <RcTable<RcTableRecordType<RecordType>>
                 prefixCls={prefixCls}
