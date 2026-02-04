@@ -711,6 +711,10 @@ export interface DripTableProps<
    */
   ext?: ExtractDripTableExtraOption<ExtraOptions, 'CustomComponentExtraData'>;
   /**
+   * 自定义渲染表格引擎
+   */
+  renderer?: () => React.ReactNode;
+  /**
    * 顶部自定义渲染函数
    */
   title?: (data: readonly RecordType[]) => React.ReactNode;

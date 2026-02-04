@@ -17,4 +17,4 @@ export { useTableComponentContext, DripTableComponentContext } from '@/component
 export type { DripTableSlotElementSchema, DripTableSlotSchema } from './components/react-components/slot-render';
 export type { DripTableWrapperContext as DripTableInstance } from './wrapper';
 export { default } from './wrapper';
-export { columnRenderGenerator as TABLE_LAYOUT_COLUMN_RENDER_GENERATOR_DO_NOT_USE_IN_PRODUCTION } from './layouts/table';
+export { columnRenderGenerator as TABLE_LAYOUT_COLUMN_RENDER_GENERATOR_DO_NOT_USE_IN_PRODUCTION } from './layouts/table/column-render-generator';

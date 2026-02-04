@@ -11,11 +11,11 @@ import './index.less';
 import isEqual from 'lodash/isEqual';
 import React from 'react';
 
+import { type DripTableColumnSchema } from '@/types';
 import { preventEvent } from '@/components/cell-components/utils';
 import Checkbox from '@/components/react-components/checkbox';
 import Tooltip from '@/components/react-components/tooltip';
 import { type IDripTableContext } from '@/hooks';
-import { type DripTableColumnSchema } from '@/index';
 
 const prefixCls = 'jfe-drip-table-layout-table-column-header-cell-toolbox-filters';
 

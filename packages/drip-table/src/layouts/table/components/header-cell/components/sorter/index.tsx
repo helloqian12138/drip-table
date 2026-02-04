@@ -11,9 +11,9 @@ import './index.less';
 import classNames from 'classnames';
 import React from 'react';
 
+import { type DripTableColumnSchema } from '@/types';
 import { preventEvent } from '@/components/cell-components/utils';
 import { type IDripTableContext } from '@/hooks';
-import { type DripTableColumnSchema } from '@/index';
 
 const prefixCls = 'jfe-drip-table-layout-table-column-header-cell-toolbox-sorter';
 

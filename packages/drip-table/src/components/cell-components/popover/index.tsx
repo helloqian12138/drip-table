@@ -13,12 +13,12 @@ import {
   type DripTableExtraOptions,
   type DripTableRecordTypeBase,
   type DripTableRecordTypeWithSubtable,
+  type ExtractDripTableExtraOption,
   type SchemaObject,
 } from '@/types';
 import { parseReactCSS, parseThemeCSS } from '@/utils/dom';
 import { DripTableComponentContext } from '@/components/cell-components/hooks';
 import Tooltip from '@/components/react-components/tooltip';
-import { type ExtractDripTableExtraOption } from '@/index';
 
 import { DripTableBuiltInColumnSchema } from '..';
 import { DripTableComponentProps } from '../component';

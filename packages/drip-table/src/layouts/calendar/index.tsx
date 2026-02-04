@@ -11,10 +11,10 @@ import './index.less';
 import moment, { Moment } from 'moment';
 import React from 'react';
 
-import { DripTableExtraOptions, DripTableRecordTypeBase, DripTableRecordTypeWithSubtable } from '@/types';
+import { type ExtractDripTableExtraOption, DripTableExtraOptions, DripTableRecordTypeBase, DripTableRecordTypeWithSubtable } from '@/types';
 import DatePicker from '@/components/react-components/date-picker';
 import { useTableContext } from '@/hooks';
-import { type ExtractDripTableExtraOption, TABLE_LAYOUT_COLUMN_RENDER_GENERATOR_DO_NOT_USE_IN_PRODUCTION as columnRenderGenerator } from '@/index';
+import { columnRenderGenerator } from '@/layouts/table/column-render-generator';
 
 import { DripTableColumnRenderOptions } from '../table/types';
 import { finalizeColumnTitle } from '../table/utils';

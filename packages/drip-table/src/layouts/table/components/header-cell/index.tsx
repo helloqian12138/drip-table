@@ -12,9 +12,11 @@ import classNames from 'classnames';
 import type { ColumnType as TableColumnType } from 'rc-table/lib/interface';
 import React from 'react';
 
+import { type DripTableExtraOptions, type DripTableRecordTypeBase, type DripTableRecordTypeWithSubtable, type ExtractDripTableExtraOption } from '@/types';
+import { indexValue } from '@/utils/operator';
+import { type DripTableBuiltInColumnSchema } from '@/components/cell-components';
 import SlotRender from '@/components/react-components/slot-render';
 import { useTableContext } from '@/hooks';
-import { type DripTableBuiltInColumnSchema, type DripTableExtraOptions, type DripTableRecordTypeBase, type DripTableRecordTypeWithSubtable, type ExtractDripTableExtraOption, indexValue } from '@/index';
 
 import HeaderCellFilter from './components/filter';
 import HeaderCellSorter from './components/sorter';

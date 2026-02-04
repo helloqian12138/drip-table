@@ -12,23 +12,20 @@ import get from 'lodash/get';
 import React, { CSSProperties } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  type DripTableExtraOptions,
+import { type DripTableExtraOptions,
   type DripTableProps,
   type DripTableRecordTypeBase,
   type DripTableRecordTypeWithSubtable,
-  type SchemaObject,
-} from '@/types';
+  type DripTableTableInformation, type ExtractDripTableExtraOption, type SchemaObject } from '@/types';
 import { getDripTableValidatePropsKeys, validateDripTableColumnSchema, validateDripTableProp, validateDripTableRequiredProps } from '@/utils/ajv';
 import { useState } from '@/utils/hooks';
+import { indexValue } from '@/utils/operator';
 import { type SandboxCreateEvaluator, type SandboxEvaluate, type SandboxSafeEvaluate, createEvaluator as defaultCreateExecutor } from '@/utils/sandbox';
-import DripTableBuiltInComponents from '@/components/cell-components';
+import DripTableBuiltInComponents, { type DripTableBuiltInColumnSchema } from '@/components/cell-components';
 import { createTableComponentState, DripTableComponentContext, IDripTableComponentContext } from '@/components/cell-components/hooks';
 import { type FinalizeString, stringify } from '@/components/cell-components/utils';
 import { type IDripTableContext, createTableState, DripTableContext } from '@/hooks';
-import { type DripTableBuiltInColumnSchema, type DripTableTableInformation, type ExtractDripTableExtraOption, indexValue } from '@/index';
 import DripTableLayout from '@/layouts';
-
 /**
  * 暴露给外部直接操作实例的接口
  */
