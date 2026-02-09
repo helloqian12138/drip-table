@@ -1733,17 +1733,14 @@ function TableLayout<
           { tableProps.renderer
             ? (
               <tableProps.renderer
-                prefixCls={prefixCls}
                 className={classNames(`${prefixCls}`, tableProps.schema.innerClassName, {
-                  [`${prefixCls}-small`]: tableProps.schema.size === 'small',
-                  [`${prefixCls}-middle`]: tableProps.schema.size === 'middle',
-                  [`${prefixCls}--bordered`]: tableProps.schema.bordered,
-                  [`${prefixCls}--border-radius`]: tableProps.schema.borderRadius,
                   [`${prefixCls}--stripe`]: tableProps.schema.stripe,
                 })}
                 rowKey="key"
+                bordered={tableProps.schema.bordered}
+                size={tableProps.schema.size === 'default' ? 'middle' : tableProps.schema.size}
                 columns={rcTableColumns}
-                data={rcTableDataSource}
+                dataSource={rcTableDataSource}
                 scroll={rcTableScroll}
                 tableLayout={tableProps.schema.tableLayout}
                 rowClassName={rcTableRowClassName}
@@ -1754,6 +1751,7 @@ function TableLayout<
                     ? tableProps.sticky ?? true
                     : false
                 }
+                pagination={false}
                 title={
                   React.useMemo(
                     () => (
@@ -1780,6 +1778,7 @@ function TableLayout<
                   onClick: () => tableProps.onRowClick?.(row.record, row.index ?? index, tableInfo),
                   onDoubleClick: () => tableProps.onRowDoubleClick?.(row.record, row.index ?? index, tableInfo),
                 })}
+                {...tableProps.restProps}
               />
             )
             : (

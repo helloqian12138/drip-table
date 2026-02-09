@@ -714,6 +714,7 @@ export interface DripTableProps<
    * 自定义渲染表格引擎
    */
   renderer?: React.JSXElementConstructor<Record<string, unknown>>;
+  restProps?: Record<string, unknown>;
   /**
    * 顶部自定义渲染函数
    */
