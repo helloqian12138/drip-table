@@ -716,6 +716,12 @@ export interface DripTableProps<
   renderer?: React.JSXElementConstructor<Record<string, unknown>>;
   restProps?: Record<string, unknown>;
   /**
+   * 定制行可拖拽样式
+   */
+  rowDragColumnWidth?: number | string;
+  rowDragHandler?: () => React.ReactNode;
+  rowDragTitle?: () => React.ReactNode;
+  /**
    * 顶部自定义渲染函数
    */
   title?: (data: readonly RecordType[]) => React.ReactNode;

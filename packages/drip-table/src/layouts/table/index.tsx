@@ -1170,8 +1170,9 @@ function TableLayout<
         flattenSchemaColumns.unshift({
           schema: rowDraggableColumnSchema,
           column: {
+            title: tableProps.rowDragTitle ? tableProps.rowDragTitle() : '',
             align: 'center',
-            width: 50,
+            width: tableProps.rowDragColumnWidth ?? 50,
             fixed: flattenSchemaColumns[0]?.column.fixed === 'left' || flattenSchemaColumns[0]?.column.fixed === true ? 'left' : void 0,
             render: (_, row) => (
               <div
@@ -1208,7 +1209,13 @@ function TableLayout<
                   }}
                   onDragEnd={() => { setDragInIndex(-1); }}
                 >
-                  <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" /></svg>
+                  {
+                    tableProps.rowDragHandler
+                      ? tableProps.rowDragHandler()
+                      : (
+                        <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" /></svg>
+                      )
+                  }
                 </div>
               </div>
             ),
@@ -1734,9 +1741,11 @@ function TableLayout<
             ? (
               <tableProps.renderer
                 className={classNames(`${prefixCls}`, tableProps.schema.innerClassName, {
+                  [`${prefixCls}--border-radius`]: tableProps.schema.borderRadius,
                   [`${prefixCls}--stripe`]: tableProps.schema.stripe,
                 })}
                 rowKey="key"
+                loading={tableProps.loading}
                 bordered={tableProps.schema.bordered}
                 size={tableProps.schema.size === 'default' ? 'middle' : tableProps.schema.size}
                 columns={rcTableColumns}
