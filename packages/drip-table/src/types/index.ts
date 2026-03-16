@@ -95,7 +95,11 @@ export interface DripTableBaseColumnSchema {
   /**
    * 表头说明
    */
-  description?: string;
+  description?: string | {
+    type: 'questionMark' | 'hyperLink';
+    content: string;
+    trigger?: 'hover' | 'click';
+  };
   /**
    * 是否固定列
    */

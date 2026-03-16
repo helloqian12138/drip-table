@@ -339,8 +339,8 @@ function ColumnHeader<
               className="jfe-drip-table-generator-workstation-table-header-column-title"
               html={columnTitle ?? ''}
             />
-            {props.column.description && (
-              <Tooltip placement="top" overlay={<RichText html={props.column.description ?? ''} />}>
+            {props.column.description && (typeof props.column.description === 'string' || props.column.description.type === 'questionMark') && (
+              <Tooltip placement="top" overlay={<RichText html={typeof props.column.description === 'string' ? props.column.description : props.column.description?.content ?? ''} />}>
                 <span style={{ marginLeft: 6, verticalAlign: 'top' }}><QuestionCircleOutlined /></span>
               </Tooltip>
             )}

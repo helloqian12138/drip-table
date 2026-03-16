@@ -25,26 +25,26 @@
 
   &-up,
   &-down {
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
-    line-height: 1;
-    padding: 4px;
+    line-height: 8px;
+    padding: 0;
 
-    &:hover {
-      background-color: #f0f0f0;
+    // &:hover {
+    //   background-color: #f0f0f0;
 
-      .jfe-drip-table-layout-table-column-header-cell-has-sorter & {
-        background-color: #eaeaea;
-      }
-    }
+    //   .jfe-drip-table-layout-table-column-header-cell-has-sorter & {
+    //     background-color: #eaeaea;
+    //   }
+    // }
   }
 
   &-full &-up {
-    padding: 1px 4px 0;
+    padding: 0;
   }
 
   &-full &-down {
-    padding: 0 4px 1px;
+    padding: 0;
   }
 
   &-up + &-down {
@@ -53,6 +53,6 @@
 
   &-up&--active,
   &-down&--active {
-    color: #1677ff;
+    color: @drip-table-primary-color;
   }
 }

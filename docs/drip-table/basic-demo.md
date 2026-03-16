@@ -36,6 +36,10 @@ const schema = {
     {
       key: "mock_2",
       title: "商品详情",
+      description: {
+        type: "hyperLink",
+        content: "这是一条提示信息"
+      },
       align: "center",
       dataIndex: "description",
       component: "text",

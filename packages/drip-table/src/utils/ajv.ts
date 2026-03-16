@@ -687,7 +687,20 @@ export const validateDripTableColumnSchema = (data: unknown, schema?: SchemaObje
       },
       dataTranslation: { type: 'string' },
       defaultValue: {},
-      description: { type: 'string' },
+      description: {
+        anyOf: [
+          { type: 'string' },
+          {
+            type: 'object',
+            properties: {
+              type: { enum: ['questionMark', 'hyperLink'] },
+              content: { type: 'string' },
+              trigger: { enum: ['hover', 'click'] },
+            },
+            required: ['type', 'content'],
+          },
+        ],
+      },
       clipboard: { type: 'boolean' },
       fixed: {
         anyOf: [
