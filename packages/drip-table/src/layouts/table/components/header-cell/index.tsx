@@ -156,6 +156,9 @@ function HeaderCell<
         </div>
         <div className={`${prefixCls}-toolbox`}>
           {
+            columnSchema.required ? (<span className={`${prefixCls}-required`}>*</span>) : null
+          }
+          {
             columnSchema.sorter
               ? (
                 <HeaderCellSorter

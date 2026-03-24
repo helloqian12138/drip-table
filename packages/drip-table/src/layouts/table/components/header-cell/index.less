@@ -15,10 +15,6 @@
   justify-content: flex-start;
   align-items: center;
 
-  &.@{prefixCls}-checked {
-    border: 1px solid @drip-table-border-color;
-  }
-
   &-has-sorter {
     cursor: pointer;
     transition: all .3s;
@@ -52,5 +48,17 @@
     flex: 0 0 auto;
     user-select: none;
     display: inline-flex;
+
+    .@{prefixCls}-required {
+      display: inline-block;
+      margin-left: 5px;
+      color: #f33b50;
+      font-size: 14px;
+      line-height: 1;
+    }
   }
+}
+
+.@{prefixCls}-checked {
+  border: 1px solid @drip-table-border-color;
 }

@@ -163,6 +163,10 @@ export interface DripTableDataColumnSchema extends DripTableBaseColumnSchema {
    * 默认数据过滤器值
    */
   defaultFilteredValue?: React.Key[] | null;
+  /**
+   * 展示必填星号
+   */
+  required?: boolean;
 }
 
 export interface DripTableColumnSchema<

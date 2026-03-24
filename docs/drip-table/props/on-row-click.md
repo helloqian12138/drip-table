@@ -35,6 +35,7 @@ const schema = {
       title: "商品名称",
       dataIndex: "name",
       component: "text",
+      required: true,
       options: {
         mode: "single",
         maxRow: 1,

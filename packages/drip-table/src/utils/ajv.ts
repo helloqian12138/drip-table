@@ -706,6 +706,7 @@ export const validateDripTableColumnSchema = (data: unknown, schema?: SchemaObje
         ],
       },
       clipboard: { type: 'boolean' },
+      required: { type: 'boolean' },
       fixed: {
         anyOf: [
           { enum: ['left', 'right'] },
