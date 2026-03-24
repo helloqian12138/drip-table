@@ -71,7 +71,6 @@ function HeaderCell<
     justifyContent = 'flex-start';
   }
   const HeaderCellFilterComponent = tableProps.renderHeaderCellFilter ?? HeaderCellFilter;
-  console.debug('header cell', tableProps.checkedColumnKey, columnSchema.key);
   return (
     <th
       {...wrapperProps}
