@@ -71,6 +71,7 @@ function HeaderCell<
     justifyContent = 'flex-start';
   }
   const HeaderCellFilterComponent = tableProps.renderHeaderCellFilter ?? HeaderCellFilter;
+  console.debug('header cell', tableProps.checkedColumnKey, columnSchema.key);
   return (
     <th
       {...wrapperProps}
@@ -79,9 +80,13 @@ function HeaderCell<
         {
           [`${prefixCls}-has-sorter`]: columnSchema.sorter,
           [`${prefixCls}-sorted`]: tableState.sorter.key === columnSchema.key,
+          [`${prefixCls}-checked`]: tableProps.checkedColumnKey === columnSchema.key,
         },
       )}
       onClick={React.useCallback(() => {
+        if (tableProps.onClickHeader) {
+          tableProps.onClickHeader(columnSchema.key, columnSchema);
+        }
         if (!columnSchema.sorter) {
           return;
         }

@@ -37,7 +37,7 @@ function hookSchemaEventRaiser<T>(schema: T, schemaFunctionPreprocessor: Sandbox
   if (Array.isArray(schema)) {
     return schema.map(v => schemaFunctionPreprocessor(v, props)) as T;
   }
-  if (schema && typeof schema === 'object') {
+  if (schema && typeof schema === 'object' && !React.isValidElement(schema)) {
     return Object.fromEntries(
       Object.entries(schema)
         .map(([k, v]) => [k, typeof v === 'function' ? schemaFunctionPreprocessor(v, props) : hookSchemaEventRaiser(v, schemaFunctionPreprocessor, props)]),

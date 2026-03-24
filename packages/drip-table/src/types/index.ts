@@ -104,6 +104,7 @@ export interface DripTableBaseColumnSchema {
    * 是否固定列
    */
   fixed?: 'left' | 'right' | boolean;
+  onCell?: string | ((record: unknown, rowIndex: number) => void);
 }
 
 export interface DripTableDataColumnSchema extends DripTableBaseColumnSchema {
@@ -719,6 +720,11 @@ export interface DripTableProps<
    */
   renderer?: React.JSXElementConstructor<Record<string, unknown>>;
   restProps?: Record<string, unknown>;
+  /**
+   * 表格列头功能配置
+   */
+  checkedColumnKey?: string;
+  onClickHeader?: (columnKey: React.Key, column: DripTableColumnSchema) => void;
   /**
    * 定制行可拖拽样式
    */

@@ -516,6 +516,10 @@ const getDripTablePropsAjvSchema = (options?: AjvOptions) => {
         renderHeaderCellFilter: {},
         createEvaluator: {},
         __PARENT_INFO__: {},
+        renderer: {},
+        restProps: {},
+        checkedColumnKey: { type: 'string' },
+        onClickHeader: { instanceof: 'Function' },
       },
       required: [
         'schema',
@@ -745,6 +749,7 @@ export const validateDripTableColumnSchema = (data: unknown, schema?: SchemaObje
       },
       filtersMaxSelect: { type: 'number' },
       defaultFilteredValue: { typeof: ['string', 'number', 'object'] },
+      onCell: { instanceof: 'Function' },
     },
     required: [
       'component',

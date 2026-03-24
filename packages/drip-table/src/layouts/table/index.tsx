@@ -202,12 +202,14 @@ const hookColumRender = <
       </React.Fragment>
     );
   };
-  column.onCell = (row, index) => {
-    if (index === void 0 || rcTableInfo.cellConfigConflictIDs[rcTableInfo.cellConfigs[index]?.[columnIndex]?.spanGroupID ?? '']) {
-      return {};
-    }
-    return rcTableInfo.cellConfigs[index]?.[columnIndex]?.data || {};
-  };
+  column.onCell = columnSchema.onCell && typeof columnSchema.onCell === 'function'
+    ? columnSchema.onCell as ((row: RcTableRecordType<RecordType, never>, index: number | undefined) => { rowSpan?: number | undefined; colSpan?: number | undefined; className?: string | undefined })
+    : (row, index) => {
+      if (index === void 0 || rcTableInfo.cellConfigConflictIDs[rcTableInfo.cellConfigs[index]?.[columnIndex]?.spanGroupID ?? '']) {
+        return {};
+      }
+      return rcTableInfo.cellConfigs[index]?.[columnIndex]?.data || {};
+    };
   return column;
 };
 

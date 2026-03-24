@@ -39,6 +39,11 @@ const schema = {
         mode: "single",
         maxRow: 1,
       },
+      onCell: (rec, index) => {
+        return {
+          onClick: () => console.log('on Cell clicked')
+        }
+      }
     },
     {
       key: "mock_2",
@@ -66,11 +71,17 @@ const dataSource = [
 ];
 
 const Demo = () => {
+  const [checkedColumnKey, setCheckedColumnKey] = React.useState('')
   return (
     <DripTable
       schema={schema}
       dataSource={dataSource}
       onRowClick={(record, index) => { console.log({ record, index }); }}
+      checkedColumnKey={checkedColumnKey}
+      onClickHeader={(key, column) => {
+        console.log(key, column)
+        setCheckedColumnKey(key)
+      }}
     />
   );
 };
