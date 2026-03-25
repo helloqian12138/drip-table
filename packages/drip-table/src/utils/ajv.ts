@@ -520,6 +520,7 @@ const getDripTablePropsAjvSchema = (options?: AjvOptions) => {
         restProps: {},
         checkedColumnKey: { type: 'string' },
         onClickHeader: { instanceof: 'Function' },
+        rowDragHandlerDisabled: { type: 'boolean' },
       },
       required: [
         'schema',

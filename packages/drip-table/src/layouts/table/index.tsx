@@ -1211,6 +1211,7 @@ function TableLayout<
                   [`${prefixCls}-column-draggable-row--drag-in`]: row.index === dragInIndex,
                 })}
                 onDrop={(e) => {
+                  if (tableProps.rowDragHandlerDisabled) { return; }
                   if (e.dataTransfer.getData('type') === `drip-table-draggable-row--${tableInfo.schema.id}`) {
                     const sourceIndex = Number.parseInt(e.dataTransfer.getData('index'), 10);
                     if (sourceIndex !== row.index) {
@@ -1231,7 +1232,7 @@ function TableLayout<
               >
                 <div
                   className={`${prefixCls}-column-draggable-row__draggable`}
-                  draggable
+                  draggable={tableProps.rowDragHandlerDisabled !== true}
                   onDragStart={(e) => {
                     e.dataTransfer.effectAllowed = 'move';
                     e.dataTransfer.setData('type', `drip-table-draggable-row--${tableInfo.schema.id}`);

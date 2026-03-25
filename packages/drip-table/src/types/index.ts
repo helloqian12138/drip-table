@@ -724,6 +724,7 @@ export interface DripTableProps<
    */
   renderer?: React.JSXElementConstructor<Record<string, unknown>>;
   restProps?: Record<string, unknown>;
+  rowDragHandlerDisabled?: boolean;
   /**
    * 表格列头功能配置
    */
