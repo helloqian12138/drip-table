@@ -56,6 +56,7 @@ const Demo = () => {
       schema={schema}
       dataSource={dataSource}
       sticky={{ offsetHeader: 64 }}
+      rowDragHandlerDisabled={false}
       onDataSourceChange={React.useMemo(() => (ds) => { setDataSource(ds); }, [])}
     />
   );
