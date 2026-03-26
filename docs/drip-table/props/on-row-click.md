@@ -69,6 +69,20 @@ const dataSource = [
     status: "onSale",
     description: "商品是为了出售而生产的劳动成果，是人类社会生产力发展到一定历史阶段的产物，是用于交换的劳动产品。",
   },
+  {
+    id: 2,
+    name: "商品二",
+    price: 7999,
+    status: "onSale",
+    description: "商品是为了出售而生产的劳动成果，是人类社会生产力发展到一定历史阶段的产物，是用于交换的劳动产品。",
+  },
+  {
+    id: 3,
+    name: "商品三",
+    price: 7999,
+    status: "onSale",
+    description: "商品是为了出售而生产的劳动成果，是人类社会生产力发展到一定历史阶段的产物，是用于交换的劳动产品。",
+  },
 ];
 
 const Demo = () => {

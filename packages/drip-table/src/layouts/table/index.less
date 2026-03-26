@@ -98,6 +98,19 @@
   &-cell--bottom { vertical-align: bottom; }
   &-cell--stretch > * { height: 100%; }
 
+  &-cell--checked {
+    border-left: 1px solid @drip-table-border-color;
+    border-right: 1px solid @drip-table-border-color;
+  }
+
+  &-tbody > tr:last-child > td&-cell--checked {
+    border-bottom: 1px solid @drip-table-border-color !important;
+  }
+
+  &:has(.@{prefixCls}-placeholder) .jfe-drip-table-layout-table-column-header-cell-checked {
+    border-bottom: 1px solid @drip-table-border-color !important;
+  }
+
   &-virtual-cell {
     display: flex;
     flex-direction: column;
