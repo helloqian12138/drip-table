@@ -865,6 +865,12 @@ export interface DripTableProps<
     dataSource: RecordType[],
     tableInfo: DripTableTableInformation<RecordType, ExtraOptions>,
   ) => void;
+  onRowShift?: (
+    dataSource: RecordType[],
+    fromIndex: number,
+    toIndex: number,
+    tableInfo: DripTableTableInformation<RecordType, ExtraOptions>,
+  ) => boolean | RecordType[];
   /**
    * 用户修改展示的列时
    */

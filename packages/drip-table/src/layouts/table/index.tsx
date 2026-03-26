@@ -1217,11 +1217,20 @@ function TableLayout<
                   if (e.dataTransfer.getData('type') === `drip-table-draggable-row--${tableInfo.schema.id}`) {
                     const sourceIndex = Number.parseInt(e.dataTransfer.getData('index'), 10);
                     if (sourceIndex !== row.index) {
-                      const ds = [...tableProps.dataSource];
+                      let ds = [...tableProps.dataSource];
                       const absSourceIndex = sourceIndex;
                       const absTargetIndex = row.index;
                       ds.splice(absSourceIndex, 1);
                       ds.splice(absTargetIndex, 0, tableProps.dataSource[absSourceIndex]);
+                      if (tableProps.onRowShift) {
+                        const res = tableProps.onRowShift(ds, absSourceIndex, absTargetIndex, tableInfo);
+                        if (typeof res === 'boolean' && !res) {
+                          return;
+                        }
+                        if (Array.isArray(res)) {
+                          ds = res;
+                        }
+                      }
                       tableProps.onDataSourceChange?.(ds, tableInfo);
                     }
                     setDragInIndex(-1);

@@ -507,6 +507,7 @@ const getDripTablePropsAjvSchema = (options?: AjvOptions) => {
         onPaginationChange: { instanceof: 'Function' },
         onSorterChange: { instanceof: 'Function' },
         onFilterChange: { instanceof: 'Function' },
+        onRowShift: { instanceof: 'Function' },
         onChange: { instanceof: 'Function' },
         onDataSourceChange: { instanceof: 'Function' },
         onDisplayColumnKeysChange: { instanceof: 'Function' },
