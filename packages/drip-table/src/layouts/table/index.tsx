@@ -1551,10 +1551,10 @@ function TableLayout<
 
   const rcTableRowClassName: React.ComponentProps<typeof RcTable>['rowClassName'] = React.useMemo(
     () =>
-      record => (tableState.selectedRowKeys.includes(record[rowKey] as React.Key)
+      record => (record.type === 'body' && tableState.selectedRowKeys.includes(record.record[rowKey] as React.Key)
         ? `${prefixCls}-row-selected`
         : ''),
-    [tableState.selectedRowKeys],
+    [tableState.selectedRowKeys, rowKey],
   );
 
   const rcTableComponents: React.ComponentProps<typeof RcTable>['components'] = React.useMemo(() => ({
