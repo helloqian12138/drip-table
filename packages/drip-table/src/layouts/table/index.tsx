@@ -147,14 +147,54 @@ const onCellMouseLeave: (e: MouseEvent) => void = (e) => {
   }
 };
 
+const parseVerticalMargin = (margin?: string) => {
+  if (!margin) {
+    return {};
+  }
+  const values: string[] = [];
+  let current = '';
+  let level = 0;
+  for (const char of margin.trim()) {
+    if (char === '(') {
+      level += 1;
+    } else if (char === ')') {
+      level = Math.max(level - 1, 0);
+    }
+    if ((/\s/u).test(char) && level === 0) {
+      if (current) {
+        values.push(current);
+        current = '';
+      }
+    } else {
+      current += char;
+    }
+  }
+  if (current) {
+    values.push(current);
+  }
+  if (values.length === 1) {
+    return { marginTop: values[0], marginBottom: values[0] };
+  }
+  if (values.length === 2) {
+    return { marginTop: values[0], marginBottom: values[0] };
+  }
+  if (values.length === 3 || values.length === 4) {
+    return { marginTop: values[0], marginBottom: values[2] };
+  }
+  return {};
+};
+
 const parseRowCustomStyle = (style: Record<string, string>) => {
   const rowStyle = { ...style };
   const border = rowStyle.border;
   const borderRadius = rowStyle['border-radius'];
-  const marginTop = rowStyle['margin-top'];
-  const marginBottom = rowStyle['margin-bottom'];
+  const margin = rowStyle.margin;
+  const marginConfig = parseVerticalMargin(margin);
+  const marginTop = rowStyle['margin-top'] ?? marginConfig.marginTop;
+  const marginBottom = rowStyle['margin-bottom'] ?? marginConfig.marginBottom;
   delete rowStyle.border;
   delete rowStyle['border-radius'];
+  delete rowStyle.margin;
   delete rowStyle['margin-top'];
   delete rowStyle['margin-bottom'];
   return { rowStyle, border, borderRadius, marginTop, marginBottom };

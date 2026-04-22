@@ -13,7 +13,7 @@ toc: content
     ```
 
 - 默认值：`undefined`
-- 说明：会作用于数据行，并且如果配置了 `rowHeader` / `rowFooter`，同一条记录对应的插槽行也会一并纳入样式范围。`border`、`borderRadius`、`marginTop`、`marginBottom` 会按整行进行渲染。若表格配置了 `expandedRowRender` 或 `subtable`，扩展图标列只会出现在正常数据行，`rowHeader` / `rowFooter` 不会保留这列。
+- 说明：会作用于数据行，并且如果配置了 `rowHeader` / `rowFooter`，同一条记录对应的插槽行也会一并纳入样式范围。`border`、`borderRadius`、`margin`、`marginTop`、`marginBottom` 会按整行进行渲染，其中 `margin` 会按 CSS 简写规则提取纵向间距。若表格配置了 `expandedRowRender` 或 `subtable`，扩展图标列只会出现在正常数据行，`rowHeader` / `rowFooter` 不会保留这列。
 
 ## 使用方法
 
@@ -41,7 +41,7 @@ const schema = {
     border: "1px solid #91b4ff",
     borderRadius: "10px",
     background: "#ffffff",
-    marginTop: "8px",
+    margin: "8px 0 12px",
   },
   columns: [
     {
