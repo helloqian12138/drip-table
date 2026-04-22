@@ -82,6 +82,150 @@
     background: @drip-table-row-selected-hover-background-color;
   }
 
+  &-tbody > tr.@{prefixCls}-row--custom-border > td,
+  &-tbody > tr.@{prefixCls}-row--custom-radius > td,
+  &-tbody > tr.@{prefixCls}-row--custom-margin-top > td,
+  &-tbody > tr.@{prefixCls}-row--custom-margin-bottom > td,
+  &-virtual-cell.@{prefixCls}-row--custom-border,
+  &-virtual-cell.@{prefixCls}-row--custom-radius,
+  &-virtual-cell.@{prefixCls}-row--custom-margin-top,
+  &-virtual-cell.@{prefixCls}-row--custom-margin-bottom {
+    position: relative;
+    background-clip: padding-box;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-style-inner > td,
+  &-virtual-cell.@{prefixCls}-row--custom-style-inner {
+    border-bottom-color: transparent;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-style-inner > td.@{prefixCls}--slot,
+  &-virtual-cell.@{prefixCls}-row--custom-style-inner.@{prefixCls}--slot {
+    border-bottom: 0;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--slot-without-expand-column > td.@{prefixCls}-row-expand-icon-cell {
+    display: none;
+  }
+
+  &-tbody > tr > td.@{prefixCls}--slot > .jfe-drip-table-rc-slot-render,
+  &-virtual-cell.@{prefixCls}--slot > .jfe-drip-table-rc-slot-render {
+    box-sizing: border-box;
+    padding-top: var(--drip-table-row-margin-top, 0);
+    padding-bottom: var(--drip-table-row-margin-bottom, 0);
+    overflow: hidden;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-margin-top.@{prefixCls}-row--custom-style-top > td,
+  &-virtual-cell.@{prefixCls}-row--custom-margin-top.@{prefixCls}-row--custom-style-top {
+    border-top: var(--drip-table-row-margin-top) solid transparent;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-margin-bottom.@{prefixCls}-row--custom-style-bottom > td,
+  &-virtual-cell.@{prefixCls}-row--custom-margin-bottom.@{prefixCls}-row--custom-style-bottom {
+    border-bottom: var(--drip-table-row-margin-bottom) solid transparent;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-border > td,
+  &-tbody > tr.@{prefixCls}-row--custom-margin-bottom.@{prefixCls}-row--custom-style-bottom > td,
+  &-virtual-cell.@{prefixCls}-row--custom-border,
+  &-virtual-cell.@{prefixCls}-row--custom-margin-bottom.@{prefixCls}-row--custom-style-bottom {
+    border-bottom-color: transparent;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-border > td::before,
+  &-tbody > tr.@{prefixCls}-row--custom-radius > td::before,
+  &-tbody > tr.@{prefixCls}-row--custom-margin-top > td::before,
+  &-tbody > tr.@{prefixCls}-row--custom-margin-bottom > td::before,
+  &-virtual-cell.@{prefixCls}-row--custom-border::before,
+  &-virtual-cell.@{prefixCls}-row--custom-radius::before,
+  &-virtual-cell.@{prefixCls}-row--custom-margin-top::before,
+  &-virtual-cell.@{prefixCls}-row--custom-margin-bottom::before {
+    content: "";
+    position: absolute;
+    top: var(--drip-table-row-margin-top, 0);
+    bottom: var(--drip-table-row-margin-bottom, 0);
+    margin-top: calc(var(--drip-table-row-margin-top, 0px) * -1);
+    margin-bottom: calc(var(--drip-table-row-margin-bottom, 0px) * -1);
+    right: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-border > td:first-child::before,
+  &-tbody > tr.@{prefixCls}-row--slot-without-expand-column.@{prefixCls}-row--custom-border > td.@{prefixCls}--slot::before,
+  &-virtual-cell.@{prefixCls}-row--custom-border.@{prefixCls}-row--custom-style-left::before {
+    border-left: var(--drip-table-row-border);
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-border > td:last-child::before,
+  &-virtual-cell.@{prefixCls}-row--custom-border.@{prefixCls}-row--custom-style-right::before {
+    border-right: var(--drip-table-row-border);
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-border.@{prefixCls}-row--custom-style-top > td::before,
+  &-virtual-cell.@{prefixCls}-row--custom-border.@{prefixCls}-row--custom-style-top::before {
+    border-top: var(--drip-table-row-border);
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-border.@{prefixCls}-row--custom-style-bottom > td::before,
+  &-virtual-cell.@{prefixCls}-row--custom-border.@{prefixCls}-row--custom-style-bottom::before {
+    border-bottom: var(--drip-table-row-border);
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-top > td:first-child,
+  &-tbody > tr.@{prefixCls}-row--slot-without-expand-column.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-top > td.@{prefixCls}--slot,
+  &-virtual-cell.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-top.@{prefixCls}-row--custom-style-left {
+    border-top-left-radius: var(--drip-table-row-border-radius);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-top > td:first-child::before,
+  &-tbody > tr.@{prefixCls}-row--slot-without-expand-column.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-top > td.@{prefixCls}--slot::before,
+  &-virtual-cell.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-top.@{prefixCls}-row--custom-style-left::before {
+    border-top-left-radius: var(--drip-table-row-border-radius);
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-top > td:last-child,
+  &-virtual-cell.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-top.@{prefixCls}-row--custom-style-right {
+    border-top-right-radius: var(--drip-table-row-border-radius);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-top > td:last-child::before,
+  &-virtual-cell.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-top.@{prefixCls}-row--custom-style-right::before {
+    border-top-right-radius: var(--drip-table-row-border-radius);
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-bottom > td:first-child,
+  &-tbody > tr.@{prefixCls}-row--slot-without-expand-column.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-bottom > td.@{prefixCls}--slot,
+  &-virtual-cell.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-bottom.@{prefixCls}-row--custom-style-left {
+    border-bottom-left-radius: var(--drip-table-row-border-radius);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-bottom > td:first-child::before,
+  &-tbody > tr.@{prefixCls}-row--slot-without-expand-column.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-bottom > td.@{prefixCls}--slot::before,
+  &-virtual-cell.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-bottom.@{prefixCls}-row--custom-style-left::before {
+    border-bottom-left-radius: var(--drip-table-row-border-radius);
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-bottom > td:last-child,
+  &-virtual-cell.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-bottom.@{prefixCls}-row--custom-style-right {
+    border-bottom-right-radius: var(--drip-table-row-border-radius);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  &-tbody > tr.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-bottom > td:last-child::before,
+  &-virtual-cell.@{prefixCls}-row--custom-radius.@{prefixCls}-row--custom-style-bottom.@{prefixCls}-row--custom-style-right::before {
+    border-bottom-right-radius: var(--drip-table-row-border-radius);
+  }
+
   &-footer {
     padding: 16px;
     color: @drip-table-text-color;

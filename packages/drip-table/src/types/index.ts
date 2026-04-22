@@ -362,6 +362,10 @@ export interface DripTableSchema<
    */
   rowHeader?: DripTableSlotSchema;
   /**
+   * 表格行样式
+   */
+  rowStyle?: string | Record<string, string>;
+  /**
    * 行尾部插槽
    */
   rowFooter?: DripTableSlotSchema;

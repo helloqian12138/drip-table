@@ -362,6 +362,7 @@ const getDripTablePropsAjvSchema = (options?: AjvOptions) => {
         rowKey: { type: 'string' },
         rowSlotKey: { type: 'string' },
         rowHeader: DRIP_TABLE_GENERIC_RENDER_SCHEMA,
+        rowStyle: DRIP_TABLE_GENERIC_CSS_SCHEMA,
         rowFooter: DRIP_TABLE_GENERIC_RENDER_SCHEMA,
         span: {
           oneOf: [

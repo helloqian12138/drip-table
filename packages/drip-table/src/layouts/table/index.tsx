@@ -147,6 +147,19 @@ const onCellMouseLeave: (e: MouseEvent) => void = (e) => {
   }
 };
 
+const parseRowCustomStyle = (style: Record<string, string>) => {
+  const rowStyle = { ...style };
+  const border = rowStyle.border;
+  const borderRadius = rowStyle['border-radius'];
+  const marginTop = rowStyle['margin-top'];
+  const marginBottom = rowStyle['margin-bottom'];
+  delete rowStyle.border;
+  delete rowStyle['border-radius'];
+  delete rowStyle['margin-top'];
+  delete rowStyle['margin-bottom'];
+  return { rowStyle, border, borderRadius, marginTop, marginBottom };
+};
+
 const hookColumRender = <
   RecordType extends DripTableRecordTypeWithSubtable<DripTableRecordTypeBase, ExtractDripTableExtraOption<ExtraOptions, 'SubtableDataSourceKey'>>,
   ExtraOptions extends Partial<DripTableExtraOptions> = never,
@@ -322,6 +335,10 @@ interface VirtualCellItemData {
   columns: TableColumnsType<unknown>;
   columnsBaseSchema: DripTableBaseColumnSchema[];
   dataSource: RcTableRecordType<DripTableRecordTypeBase>[];
+  pageDataSourceOffset: number;
+  pageDataSourceRowHeaderVisible: Record<number, boolean>;
+  pageDataSourceRowFooterVisible: Record<number, boolean>;
+  rowStyleSchema?: string | Record<string, string>;
   rowKey: React.Key;
   selectedRowKeys: IDripTableContext['state']['selectedRowKeys'];
   ext: unknown;
@@ -329,14 +346,34 @@ interface VirtualCellItemData {
 
 const VirtualCell = React.memo(({ data, columnIndex, rowIndex, style: vcStyle }: GridChildComponentProps<VirtualCellItemData>) => {
   const { safeEvaluate: safeExecute } = useTableContext();
-  const { tableUUID, columns, columnsBaseSchema, dataSource, rowKey, selectedRowKeys, ext } = data;
+  const {
+    tableUUID,
+    columns,
+    columnsBaseSchema,
+    dataSource,
+    pageDataSourceOffset,
+    pageDataSourceRowHeaderVisible,
+    pageDataSourceRowFooterVisible,
+    rowKey,
+    selectedRowKeys,
+    ext,
+  } = data;
   const columnBaseSchema = childrenLike.findRecursive(columnsBaseSchema, (_, i) => i === columnIndex) as DripTableBaseColumnSchema;
   const column = childrenLike.findRecursive(columns, (_, i) => i === columnIndex) as TableColumnType<unknown>;
   const row = dataSource[rowIndex];
   const recKey = row.record[rowKey] as React.Key;
   const selected = selectedRowKeys.includes(recKey);
+  const relativeIndex = row.index - pageDataSourceOffset;
+  const rowHeaderVisible = !!pageDataSourceRowHeaderVisible[relativeIndex];
+  const rowFooterVisible = !!pageDataSourceRowFooterVisible[relativeIndex];
   const context = { props: { record: row.record, recordIndex: row.index, ext } };
   const parseStyleSchema = (style: string | Record<string, string> | undefined) => parseCSS(typeof style === 'string' ? safeExecute(style, context) : style);
+  const { rowStyle, border, borderRadius, marginTop, marginBottom } = parseRowCustomStyle(parseStyleSchema(data.rowStyleSchema));
+  const customRowStyle = border || borderRadius || marginTop || marginBottom;
+  const top = row.type === 'header' || (row.type === 'body' && !rowHeaderVisible);
+  const bottom = row.type === 'footer' || (row.type === 'body' && !rowFooterVisible);
+  const effectiveMarginTop = top ? marginTop : void 0;
+  const effectiveMarginBottom = bottom ? marginBottom : void 0;
   const styleText = stringifyCSS(Object.assign(
     { 'text-align': columnBaseSchema.align },
     Object.fromEntries(Object.entries(vcStyle).map(([k, v]) => {
@@ -345,7 +382,12 @@ const VirtualCell = React.memo(({ data, columnIndex, rowIndex, style: vcStyle }:
       }
       return [k, v];
     })),
+    rowStyle,
     parseStyleSchema(columnBaseSchema.style),
+    border ? { '--drip-table-row-border': border } : null,
+    borderRadius ? { '--drip-table-row-border-radius': borderRadius } : null,
+    effectiveMarginTop ? { '--drip-table-row-margin-top': effectiveMarginTop } : null,
+    effectiveMarginBottom ? { '--drip-table-row-margin-bottom': effectiveMarginBottom } : null,
   ));
   return (
     <div
@@ -355,6 +397,15 @@ const VirtualCell = React.memo(({ data, columnIndex, rowIndex, style: vcStyle }:
         [`${prefixCls}-virtual-cell--bottom`]: columnBaseSchema?.verticalAlign === 'bottom',
         [`${prefixCls}-virtual-cell--stretch`]: columnBaseSchema?.verticalAlign === 'stretch',
         [`${prefixCls}--row-selected`]: selected,
+        [`${prefixCls}-row--custom-border`]: !!border,
+        [`${prefixCls}-row--custom-radius`]: !!borderRadius,
+        [`${prefixCls}-row--custom-margin-top`]: !!effectiveMarginTop,
+        [`${prefixCls}-row--custom-margin-bottom`]: !!effectiveMarginBottom,
+        [`${prefixCls}-row--custom-style-inner`]: customRowStyle && !bottom,
+        [`${prefixCls}-row--custom-style-top`]: customRowStyle && top,
+        [`${prefixCls}-row--custom-style-bottom`]: customRowStyle && bottom,
+        [`${prefixCls}-row--custom-style-left`]: customRowStyle && columnIndex === 0,
+        [`${prefixCls}-row--custom-style-right`]: customRowStyle && columnIndex === data.columns.length - 1,
       })}
       style={parseReactCSS(styleText)}
       data-table-uuid={tableUUID}
@@ -1004,6 +1055,7 @@ function TableLayout<
 
   const rcTableInfo = React.useMemo(() => {
     const flattenColumns = childrenLike.flattenRecursive(tableInfo.schema.columns);
+    const fullRowSpanColumnCount = flattenColumns.length + (rowExpandColumnVisible ? 1 : 0);
     const rti: RcTableInfo = { cellConfigs: {}, cellConfigConflictIDs: {}, maxColumnIndex: 0, maxRowIndex: 0 };
     rti.maxRowIndex = pageDataSource.length - 1;
     rti.maxColumnIndex = tableInfo.schema.columns.length - 1;
@@ -1054,7 +1106,7 @@ function TableLayout<
           setCellConfig(rti, rowIndex, 0, {
             data: {
               className: `${prefixCls}--slot`,
-              colSpan: flattenColumns.length,
+              colSpan: fullRowSpanColumnCount,
             },
             spanType: 'row',
             spanGroupID: `row-${rowIndex}`,
@@ -1072,7 +1124,7 @@ function TableLayout<
         setCellConfig(rti, index + 1, 0, {
           data: {
             className: `${prefixCls}--slot`,
-            colSpan: flattenColumns.length,
+            colSpan: fullRowSpanColumnCount,
           },
           spanType: 'row',
           spanGroupID: `footer-${index}`,
@@ -1083,7 +1135,7 @@ function TableLayout<
         setCellConfig(rti, index, 0, {
           data: {
             className: `${prefixCls}--slot`,
-            colSpan: flattenColumns.length,
+            colSpan: fullRowSpanColumnCount,
           },
           spanType: 'row',
           spanGroupID: `header-${index}`,
@@ -1112,6 +1164,7 @@ function TableLayout<
     pageDataSourceOffset,
     spanSchema,
     tableInfo.schema.columns,
+    rowExpandColumnVisible,
     hiddenColumnIndexes,
     pageDataSourceRowHeaderVisible,
     pageDataSourceRowFooterVisible,
@@ -1549,12 +1602,68 @@ function TableLayout<
     [setRcTableWidth],
   );
 
+  const getRcTableRowProps = React.useCallback((row: RcTableRecordType<RecordType>, index: number | undefined) => {
+    const selected = row.type === 'body' && tableState.selectedRowKeys.includes(row.record[rowKey] as React.Key);
+    const currentIndex = row.index ?? index ?? 0;
+    const relativeIndex = currentIndex - pageDataSourceOffset;
+    const rowHeaderVisible = !!pageDataSourceRowHeaderVisible[relativeIndex];
+    const rowFooterVisible = !!pageDataSourceRowFooterVisible[relativeIndex];
+    const rowStyleSchema = tableInfo.schema.rowStyle;
+    const parsedRowStyle = parseCSS(
+      typeof rowStyleSchema === 'string'
+        ? safeEvaluate(rowStyleSchema, { props: { record: row.record, recordIndex: currentIndex, ext: tableProps.ext } })
+        : rowStyleSchema,
+    );
+    const { rowStyle, border, borderRadius, marginTop, marginBottom } = parseRowCustomStyle(parsedRowStyle);
+    const customRowStyle = border || borderRadius || marginTop || marginBottom;
+    const top = row.type === 'header' || (row.type === 'body' && !rowHeaderVisible);
+    const bottom = row.type === 'footer' || (row.type === 'body' && !rowFooterVisible);
+    const effectiveMarginTop = top ? marginTop : void 0;
+    const effectiveMarginBottom = bottom ? marginBottom : void 0;
+
+    return {
+      className: classNames({
+        [`${prefixCls}-row-selected`]: selected,
+        [`${prefixCls}-row--slot-without-expand-column`]: rowExpandColumnVisible && row.type !== 'body',
+        [`${prefixCls}-row--custom-border`]: !!border,
+        [`${prefixCls}-row--custom-radius`]: !!borderRadius,
+        [`${prefixCls}-row--custom-margin-top`]: !!effectiveMarginTop,
+        [`${prefixCls}-row--custom-margin-bottom`]: !!effectiveMarginBottom,
+        [`${prefixCls}-row--custom-style-inner`]: customRowStyle && !bottom,
+        [`${prefixCls}-row--custom-style-top`]: customRowStyle && top,
+        [`${prefixCls}-row--custom-style-bottom`]: customRowStyle && bottom,
+      }),
+      style: Object.assign(
+        parseReactCSS(rowStyle),
+        border ? { '--drip-table-row-border': border } : null,
+        borderRadius ? { '--drip-table-row-border-radius': borderRadius } : null,
+        effectiveMarginTop ? { '--drip-table-row-margin-top': effectiveMarginTop } : null,
+        effectiveMarginBottom ? { '--drip-table-row-margin-bottom': effectiveMarginBottom } : null,
+      ) as React.CSSProperties,
+      onClick: () => tableProps.onRowClick?.(row.record, currentIndex, tableInfo),
+      onDoubleClick: () => tableProps.onRowDoubleClick?.(row.record, currentIndex, tableInfo),
+    };
+  }, [
+    pageDataSourceOffset,
+    pageDataSourceRowHeaderVisible,
+    pageDataSourceRowFooterVisible,
+    rowKey,
+    safeEvaluate,
+    tableInfo,
+    tableInfo.schema.rowStyle,
+    tableProps.ext,
+    tableProps.onRowClick,
+    tableProps.onRowDoubleClick,
+    tableState.selectedRowKeys,
+    rowExpandColumnVisible,
+  ]);
+
   const rcTableRowClassName: React.ComponentProps<typeof RcTable>['rowClassName'] = React.useMemo(
-    () =>
-      record => (record.type === 'body' && tableState.selectedRowKeys.includes(record.record[rowKey] as React.Key)
-        ? `${prefixCls}-row-selected`
-        : ''),
-    [tableState.selectedRowKeys, rowKey],
+    () => (record) => {
+      const rcRecord = record as RcTableRecordType<RecordType>;
+      return getRcTableRowProps(rcRecord, rcRecord.index).className || '';
+    },
+    [getRcTableRowProps],
   );
 
   const rcTableComponents: React.ComponentProps<typeof RcTable>['components'] = React.useMemo(() => ({
@@ -1570,6 +1679,10 @@ function TableLayout<
             columns: rcTableColumns as TableColumnsType<unknown>,
             columnsBaseSchema,
             dataSource: rcTableDataSource,
+            pageDataSourceOffset,
+            pageDataSourceRowHeaderVisible,
+            pageDataSourceRowFooterVisible,
+            rowStyleSchema: tableInfo.schema.rowStyle,
             rowKey,
             selectedRowKeys: tableState.selectedRowKeys,
             ext: tableProps.ext,
@@ -1604,7 +1717,7 @@ function TableLayout<
   ]);
 
   const RcExpandIcon = React.useCallback(({ expandable, expanded, record: row, onExpand }: Parameters<NonNullable<NonNullable<RcTableProps<RcTableRecordType<RecordType>>['expandable']>['expandIcon']>>[0]) => {
-    if (!expandable) {
+    if (!expandable || row.type !== 'body') {
       return null;
     }
     return (
@@ -1738,6 +1851,9 @@ function TableLayout<
           expandIcon: RcExpandIcon,
           expandedRowRender: RcExpandRowRender,
           rowExpandable: (row) => {
+            if (row.type !== 'body') {
+              return false;
+            }
             if (rowExpandable?.(row.record, row.index, { ...tableInfo, record: row.record })) {
               return true;
             }
@@ -1826,10 +1942,7 @@ function TableLayout<
                 }
                 expandable={rcTableExpandable}
                 emptyText={RcEmptyText}
-                onRow={(row: RcTableRecordType<RecordType>, index: number) => ({
-                  onClick: () => tableProps.onRowClick?.(row.record, row.index ?? index, tableInfo),
-                  onDoubleClick: () => tableProps.onRowDoubleClick?.(row.record, row.index ?? index, tableInfo),
-                })}
+                onRow={(row: RcTableRecordType<RecordType>, index: number) => getRcTableRowProps(row, index)}
                 {...tableProps.restProps}
               />
             )
@@ -1887,10 +2000,7 @@ function TableLayout<
                 }
                 expandable={rcTableExpandable}
                 emptyText={RcEmptyText}
-                onRow={(row, index) => ({
-                  onClick: () => tableProps.onRowClick?.(row.record, row.index ?? index, tableInfo),
-                  onDoubleClick: () => tableProps.onRowDoubleClick?.(row.record, row.index ?? index, tableInfo),
-                })}
+                onRow={(row, index) => getRcTableRowProps(row, index)}
               />
             ) }
         </div>
